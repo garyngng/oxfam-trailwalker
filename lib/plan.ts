@@ -46,9 +46,23 @@ export const DEFAULT_STOPS: Stops = {
   dinnerMin: 25,
 };
 
+export type StationKind = "cp" | "support" | "finish";
+
+export type Station = {
+  id: string;
+  name: string;
+  kind: StationKind;
+  gpsKm: number;
+  gpsSectionKm: number;
+  sheetSectionKm: number;
+  sheetMinutes: Record<Target, number>;
+  blurb: string;
+};
+
 export type CpClock = {
   id: string;
   name: string;
+  kind: StationKind;
   arrive: number;
   depart: number;
   rest: number;
@@ -59,15 +73,74 @@ export type CpClock = {
   sheetSectionKm: number;
 };
 
-export function stopFor(id: string, stops: Stops) {
-  if (id === "finish") return { minutes: 0, meal: null as Meal | null };
-  const lunch = id === stops.lunchId;
-  const dinner = id === stops.dinnerId;
+const SHEET_SPLIT: Record<string, { sheetSectionKm: number; minutes: Record<Target, number> }> = {
+  cp5: { sheetSectionKm: 4.6, minutes: { "18": 60, "20": 63, "22": 76, "24": 88, "26": 95, "28": 95 } },
+  cp6: { sheetSectionKm: 3.6, minutes: { "18": 37, "20": 39, "22": 34, "24": 29, "26": 32, "28": 43 } },
+  cp7: { sheetSectionKm: 9.1, minutes: { "18": 95, "20": 102, "22": 116, "24": 130, "26": 146, "28": 164 } },
+};
+
+const SUPPORTS: Omit<Station, "gpsSectionKm">[] = [
+  {
+    id: "fei-ngo",
+    name: "飛鵝山觀景台",
+    kind: "support",
+    gpsKm: 49.28,
+    sheetSectionKm: 2.7,
+    sheetMinutes: { "18": 36, "20": 37, "22": 44, "24": 52, "26": 55, "28": 55 },
+    blurb: "支援點。基維爾之後、大老山一帶，車可以到。",
+  },
+  {
+    id: "golden-toilet",
+    name: "金山公廁",
+    kind: "support",
+    gpsKm: 57.61,
+    sheetSectionKm: 2.4,
+    sheetMinutes: { "18": 24, "20": 26, "22": 23, "24": 20, "26": 22, "28": 29 },
+    blurb: "馬騮山公共洗手間。鷹巢山落大埔公路附近。",
+  },
+  {
+    id: "shing-mun",
+    name: "城門水塘",
+    kind: "support",
+    gpsKm: 62.54,
+    sheetSectionKm: 2.9,
+    sheetMinutes: { "18": 30, "20": 33, "22": 37, "24": 41, "26": 46, "28": 52 },
+    blurb: "4號燒烤場。支援隊可以交熱飯，可以喺呢度食晚餐，食完先上針山。",
+  },
+];
+
+export function stations(): Station[] {
+  const official: Omit<Station, "gpsSectionKm">[] = course.checkpoints.map((cp) => {
+    const split = SHEET_SPLIT[cp.id];
+    return {
+      id: cp.id,
+      name: cp.name,
+      kind: cp.id === "finish" ? "finish" : "cp",
+      gpsKm: cp.gpsKm,
+      sheetSectionKm: split?.sheetSectionKm ?? cp.sheetSectionKm,
+      sheetMinutes: split?.minutes ?? cp.minutes,
+      blurb: cp.blurb,
+    };
+  });
+  const ordered = [...official, ...SUPPORTS].sort((a, b) => a.gpsKm - b.gpsKm);
+  let prev = 0;
+  return ordered.map((station) => {
+    const gpsSectionKm = Math.round((station.gpsKm - prev) * 100) / 100;
+    prev = station.gpsKm;
+    return { ...station, gpsSectionKm };
+  });
+}
+
+export function stopFor(station: { id: string; kind: StationKind }, stops: Stops) {
+  if (station.kind === "finish") return { minutes: 0, meal: null as Meal | null };
+  const lunch = station.id === stops.lunchId;
+  const dinner = station.id === stops.dinnerId;
   if (lunch && dinner) {
     return { minutes: Math.max(stops.lunchMin, stops.dinnerMin), meal: "午晚餐" as Meal };
   }
   if (lunch) return { minutes: stops.lunchMin, meal: "午餐" as Meal };
   if (dinner) return { minutes: stops.dinnerMin, meal: "晚餐" as Meal };
+  if (station.kind === "support") return { minutes: 0, meal: null as Meal | null };
   return { minutes: stops.restMin, meal: null as Meal | null };
 }
 
@@ -122,9 +195,12 @@ const FASTEST_PACE: Record<string, number> = {
   cp2: 9.2,
   cp3: 11.2,
   cp4: 10.2,
-  cp5: 9.6,
-  cp6: 11,
-  cp7: 12.2,
+  "fei-ngo": 10.5,
+  cp5: 9.2,
+  "golden-toilet": 10,
+  cp6: 11.5,
+  "shing-mun": 8,
+  cp7: 13,
   cp8: 10,
   cp9: 7.6,
   finish: 8.4,
@@ -176,41 +252,52 @@ function segmentMinutes(group: Segment[], budget: number) {
   return locked;
 }
 
-function sectionWeight(cpId: string) {
-  return course.segments
-    .filter((s) => s.cp === cpId)
-    .reduce((sum, s) => sum + s.distanceKm * s.effort, 0);
+function rangeWeight(fromKm: number, toKm: number) {
+  return course.segments.reduce((sum, segment) => {
+    const overlap = Math.min(segment.toKm, toKm) - Math.max(segment.fromKm, fromKm);
+    return overlap > 0 ? sum + overlap * segment.effort : sum;
+  }, 0);
 }
 
 function restTotal(stops: Stops) {
-  return course.checkpoints.reduce((sum, cp) => sum + stopFor(cp.id, stops).minutes, 0);
+  return stations().reduce((sum, station) => sum + stopFor(station, stops).minutes, 0);
 }
 
 /** Moving minutes per checkpoint. Rest is already removed from the target, and no section is asked to go faster than FASTEST_PACE unless the budget cannot hold. */
 export function movingMinutes(target: Target, stops: Stops) {
   const budget = Math.max(60, Number(target) * 60 - restTotal(stops));
-  const weights = new Map(course.checkpoints.map((cp) => [cp.id, sectionWeight(cp.id)]));
+  const list = stations();
+  const weights = new Map<string, number>();
+  let prevKm = 0;
+  for (const station of list) {
+    weights.set(station.id, rangeWeight(prevKm, station.gpsKm));
+    prevKm = station.gpsKm;
+  }
   const locked = new Map<string, number>();
 
-  for (let pass = 0; pass < course.checkpoints.length + 1; pass += 1) {
-    const free = course.checkpoints.filter((cp) => !locked.has(cp.id));
+  for (let pass = 0; pass < list.length + 1; pass += 1) {
+    const free = list.filter((station) => !locked.has(station.id));
     if (free.length === 0) break;
     const used = [...locked.values()].reduce((sum, mins) => sum + mins, 0);
     const left = budget - used;
-    const weight = free.reduce((sum, cp) => sum + (weights.get(cp.id) ?? 0), 0) || 1;
-    const tighten = free.flatMap((cp) => {
-      const share = (left * (weights.get(cp.id) ?? 0)) / weight;
-      const floor = FASTEST_PACE[cp.id] * cp.gpsSectionKm;
-      return share < floor - 0.05 ? [[cp.id, floor] as const] : [];
+    const weight = free.reduce((sum, station) => sum + (weights.get(station.id) ?? 0), 0) || 1;
+    const tighten = free.flatMap((station) => {
+      const share = (left * (weights.get(station.id) ?? 0)) / weight;
+      const floor = FASTEST_PACE[station.id] * station.gpsSectionKm;
+      return share < floor - 0.05 ? [[station.id, floor] as const] : [];
     });
     if (tighten.length === 0 || left <= 0) {
-      for (const cp of free) locked.set(cp.id, (left * (weights.get(cp.id) ?? 0)) / weight);
+      for (const station of free) {
+        locked.set(station.id, (left * (weights.get(station.id) ?? 0)) / weight);
+      }
       break;
     }
     const tightenSum = tighten.reduce((sum, [, mins]) => sum + mins, 0);
-    const remaining = free.filter((cp) => !tighten.some(([id]) => id === cp.id));
+    const remaining = free.filter((station) => !tighten.some(([id]) => id === station.id));
     if (remaining.length === 0 && tightenSum > left + 0.5) {
-      for (const cp of free) locked.set(cp.id, (left * (weights.get(cp.id) ?? 0)) / weight);
+      for (const station of free) {
+        locked.set(station.id, (left * (weights.get(station.id) ?? 0)) / weight);
+      }
       break;
     }
     for (const [id, mins] of tighten) locked.set(id, mins);
@@ -232,33 +319,39 @@ export function buildPlan(target: Target, startHHMM: string, stops: Stops = DEFA
   let moving = 0;
   let rest = 0;
   const allocated = movingMinutes(target, stops);
+  let prevKm = 0;
 
-  for (const cp of course.checkpoints) {
-    const minutes = allocated.get(cp.id) ?? 0;
-    const group = course.segments.filter((s) => s.cp === cp.id);
+  for (const station of stations()) {
+    const minutes = allocated.get(station.id) ?? 0;
+    const group = course.segments.filter((segment) => {
+      const mid = (segment.fromKm + segment.toKm) / 2;
+      return mid > prevKm && mid <= station.gpsKm + 0.001;
+    });
     const slices = segmentMinutes(group, minutes);
-    for (const s of group) {
-      const slice = slices.get(s.id) ?? 0;
+    for (const segment of group) {
+      const slice = slices.get(segment.id) ?? 0;
       const from = cursor;
       cursor += slice;
-      seg.set(s.id, { start: from, end: cursor, minutes: slice });
+      seg.set(segment.id, { start: from, end: cursor, minutes: slice });
     }
+    prevKm = station.gpsKm;
     moving += minutes;
-    const stop = stopFor(cp.id, stops);
+    const stop = stopFor(station, stops);
     const arrive = cursor;
     cursor += stop.minutes;
     rest += stop.minutes;
     cps.push({
-      id: cp.id,
-      name: cp.name,
+      id: station.id,
+      name: station.name,
+      kind: station.kind,
       arrive,
       depart: cursor,
       rest: stop.minutes,
       meal: stop.meal,
       minutes,
-      sheetMinutes: cp.minutes[target],
-      gpsSectionKm: cp.gpsSectionKm,
-      sheetSectionKm: cp.sheetSectionKm,
+      sheetMinutes: station.sheetMinutes[target],
+      gpsSectionKm: station.gpsSectionKm,
+      sheetSectionKm: station.sheetSectionKm,
     });
   }
 

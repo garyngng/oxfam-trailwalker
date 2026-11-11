@@ -27,6 +27,7 @@ import {
   PACE_LABEL,
   segmentById,
   segmentsFor,
+  stations,
   TARGETS,
   type Filter,
   type Pace,
@@ -167,14 +168,15 @@ export function Guide() {
           />
           <MealPick
             label="晚餐"
-            hint="預設畢架山。食完加衫、開頭燈，先上針山、草山、大帽山。鉛礦坳先食會太肚餓。"
+            hint="預設畢架山，大約日落食完就入黑。可以改城門水塘4號燒烤，支援隊交到熱飯，食完先上針山。"
             stationId={stops.dinnerId}
             minutes={stops.dinnerMin}
+            choices={dinnerChoices()}
             onStation={(dinnerId) => setStops((s) => ({ ...s, dinnerId }))}
             onMinutes={(dinnerMin) => setStops((s) => ({ ...s, dinnerMin }))}
           />
           <p className="text-xs leading-5 text-[#5c564c]">
-            食飯嗰站嘅分鐘已經包括上廁所，唔會再加每站休息。時間由最後一個入站計，四個人要齊。基維爾好容易坐耐，如果唔係食飯站，鐘一到就走。
+            食飯嗰站嘅分鐘已經包括上廁所。檢查站先有每站休息；飛鵝山、金山公廁同城門行過唔停，除非你揀咗喺城門食晚餐。時間由最後一個入站計。
           </p>
         </div>
       </section>
@@ -185,8 +187,13 @@ export function Guide() {
           const pace = cp.minutes / cp.gpsSectionKm;
           const off = Math.abs(cp.sheetSectionKm - cp.gpsSectionKm) >= 1.5;
           return (
-            <li key={cp.id} className="rounded-2xl border border-[#d9d0c0] bg-[#f7f3ea] px-3 py-2">
-              <p className="text-[11px] text-[#5c564c]">{cp.id === "finish" ? "終點" : cp.id.toUpperCase()}</p>
+            <li
+              key={cp.id}
+              className={`rounded-2xl border px-3 py-2 ${cp.kind === "support" ? "border-[#e2c27a] bg-[#fbf6ea]" : "border-[#d9d0c0] bg-[#f7f3ea]"}`}
+            >
+              <p className="text-[11px] text-[#5c564c]">
+                {cp.kind === "support" ? "支援" : cp.kind === "finish" ? "終點" : cp.id.toUpperCase()}
+              </p>
               <p className="font-serif text-lg leading-tight">{cp.name}</p>
               <p className="text-sm tabular-nums">到 {formatClock(cp.arrive)}</p>
               {cp.rest > 0 && (
@@ -438,10 +445,13 @@ export function Guide() {
                 </tr>
               </thead>
               <tbody>
-                {courseData.checkpoints.map((cp) => {
+                {stations().map((cp) => {
                   const off = Math.abs(cp.sheetSectionKm - cp.gpsSectionKm) >= 1.5;
                   return (
-                    <tr key={cp.id} className="border-t border-[#e6dccb] align-top odd:bg-[#f7f3ea]">
+                    <tr
+                      key={cp.id}
+                      className={`border-t border-[#e6dccb] align-top ${cp.kind === "support" ? "bg-[#fbf6ea]" : "odd:bg-[#f7f3ea]"}`}
+                    >
                       <td className="px-3 py-2">
                         <div className="font-medium">{cp.name}</div>
                         <div className="text-xs text-[#5c564c]">{cp.blurb}</div>
@@ -450,7 +460,7 @@ export function Guide() {
                         {cp.sheetSectionKm} / {cp.gpsSectionKm} 公里
                       </td>
                       {TARGETS.map((t) => {
-                        const mins = cp.minutes[t];
+                        const mins = cp.sheetMinutes[t];
                         const arrive = sheetArrival(cp.id, t);
                         const pace = mins / cp.gpsSectionKm;
                         return (
@@ -580,6 +590,15 @@ export function Guide() {
   );
 }
 
+function dinnerChoices() {
+  return [
+    ...courseData.checkpoints
+      .filter((cp) => cp.id !== "finish")
+      .map((cp) => ({ id: cp.id, name: cp.name })),
+    { id: "shing-mun", name: "城門水塘" },
+  ];
+}
+
 function MealPick({
   label,
   hint,
@@ -587,6 +606,7 @@ function MealPick({
   minutes,
   onStation,
   onMinutes,
+  choices,
 }: {
   label: string;
   hint: string;
@@ -594,8 +614,13 @@ function MealPick({
   minutes: number;
   onStation: (id: string) => void;
   onMinutes: (mins: number) => void;
+  choices?: { id: string; name: string }[];
 }) {
-  const stations = courseData.checkpoints.filter((cp) => cp.id !== "finish");
+  const stations =
+    choices ??
+    courseData.checkpoints
+      .filter((cp) => cp.id !== "finish")
+      .map((cp) => ({ id: cp.id, name: cp.name }));
   return (
     <div>
       <p className="text-xs font-medium tracking-wide text-[#5c564c]">{label}</p>
@@ -632,9 +657,9 @@ function MealPick({
 
 function sheetArrival(cpId: string, target: Target) {
   let cursor = 8 * 60;
-  for (const cp of courseData.checkpoints) {
-    cursor += cp.minutes[target];
-    if (cp.id === cpId) return cursor;
+  for (const station of stations()) {
+    cursor += station.sheetMinutes[target];
+    if (station.id === cpId) return cursor;
   }
   return cursor;
 }
