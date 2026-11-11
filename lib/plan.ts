@@ -25,7 +25,6 @@ export const PACE_COLOR: Record<Pace, string> = {
   up: "#c46a32",
 };
 
-type Checkpoint = (typeof course.checkpoints)[number];
 type Segment = (typeof course.segments)[number];
 
 export type SegClock = { start: number; end: number; minutes: number };
@@ -55,6 +54,7 @@ export type CpClock = {
   rest: number;
   meal: Meal | null;
   minutes: number;
+  sheetMinutes: number;
   gpsSectionKm: number;
   sheetSectionKm: number;
 };
@@ -116,38 +116,133 @@ export const LIGHT_LABEL: Record<Light, string> = {
   night: "入黑",
 };
 
-function sectionMinutes(cp: Checkpoint, target: Target, stretchFinish: boolean) {
-  const sheet = cp.minutes[target];
-  if (stretchFinish && cp.id === "finish") {
-    return (sheet / cp.sheetSectionKm) * cp.gpsSectionKm;
+/** Fastest pace worth asking for, in minutes per kilometre. Slower terrain keeps more time. */
+const FASTEST_PACE: Record<string, number> = {
+  cp1: 8.8,
+  cp2: 9.2,
+  cp3: 11.2,
+  cp4: 10.2,
+  cp5: 9.6,
+  cp6: 11,
+  cp7: 12.2,
+  cp8: 10,
+  cp9: 7.6,
+  finish: 8.4,
+};
+
+const SEGMENT_FLOOR: Record<Pace, number> = {
+  run: 6.5,
+  fast: 7.2,
+  hike: 9,
+  care: 9,
+  up: 9.5,
+  grind: 14,
+};
+
+function segmentMinutes(group: Segment[], budget: number) {
+  const locked = new Map<string, number>();
+  const weight = (s: Segment) => s.distanceKm * s.effort;
+  const floorOf = (s: Segment) => (s.id === "s04" ? 6 : SEGMENT_FLOOR[s.pace as Pace]) * s.distanceKm;
+
+  for (let pass = 0; pass < group.length + 1; pass += 1) {
+    const free = group.filter((s) => !locked.has(s.id));
+    if (free.length === 0) break;
+    const used = [...locked.values()].reduce((sum, mins) => sum + mins, 0);
+    const left = budget - used;
+    const total = free.reduce((sum, s) => sum + weight(s), 0) || 1;
+    const tighten = free.flatMap((s) => {
+      const share = (left * weight(s)) / total;
+      const floor = floorOf(s);
+      return share < floor - 0.05 ? [[s.id, floor] as const] : [];
+    });
+    if (tighten.length === 0 || left <= 0) {
+      for (const s of free) locked.set(s.id, (left * weight(s)) / total);
+      break;
+    }
+    const tightenSum = tighten.reduce((sum, [, mins]) => sum + mins, 0);
+    const remaining = free.filter((s) => !tighten.some(([id]) => id === s.id));
+    if (remaining.length === 0 && tightenSum > left + 0.5) {
+      for (const s of free) locked.set(s.id, (left * weight(s)) / total);
+      break;
+    }
+    for (const [id, mins] of tighten) locked.set(id, mins);
   }
-  return sheet;
+
+  const sum = [...locked.values()].reduce((total, mins) => total + mins, 0);
+  if (sum > budget + 0.2) {
+    const scale = budget / sum;
+    for (const [id, mins] of locked) locked.set(id, mins * scale);
+  }
+  return locked;
 }
 
-export function buildPlan(
-  target: Target,
-  startHHMM: string,
-  stretchFinish: boolean,
-  stops: Stops = DEFAULT_STOPS,
-) {
+function sectionWeight(cpId: string) {
+  return course.segments
+    .filter((s) => s.cp === cpId)
+    .reduce((sum, s) => sum + s.distanceKm * s.effort, 0);
+}
+
+function restTotal(stops: Stops) {
+  return course.checkpoints.reduce((sum, cp) => sum + stopFor(cp.id, stops).minutes, 0);
+}
+
+/** Moving minutes per checkpoint. Rest is already removed from the target, and no section is asked to go faster than FASTEST_PACE unless the budget cannot hold. */
+export function movingMinutes(target: Target, stops: Stops) {
+  const budget = Math.max(60, Number(target) * 60 - restTotal(stops));
+  const weights = new Map(course.checkpoints.map((cp) => [cp.id, sectionWeight(cp.id)]));
+  const locked = new Map<string, number>();
+
+  for (let pass = 0; pass < course.checkpoints.length + 1; pass += 1) {
+    const free = course.checkpoints.filter((cp) => !locked.has(cp.id));
+    if (free.length === 0) break;
+    const used = [...locked.values()].reduce((sum, mins) => sum + mins, 0);
+    const left = budget - used;
+    const weight = free.reduce((sum, cp) => sum + (weights.get(cp.id) ?? 0), 0) || 1;
+    const tighten = free.flatMap((cp) => {
+      const share = (left * (weights.get(cp.id) ?? 0)) / weight;
+      const floor = FASTEST_PACE[cp.id] * cp.gpsSectionKm;
+      return share < floor - 0.05 ? [[cp.id, floor] as const] : [];
+    });
+    if (tighten.length === 0 || left <= 0) {
+      for (const cp of free) locked.set(cp.id, (left * (weights.get(cp.id) ?? 0)) / weight);
+      break;
+    }
+    const tightenSum = tighten.reduce((sum, [, mins]) => sum + mins, 0);
+    const remaining = free.filter((cp) => !tighten.some(([id]) => id === cp.id));
+    if (remaining.length === 0 && tightenSum > left + 0.5) {
+      for (const cp of free) locked.set(cp.id, (left * (weights.get(cp.id) ?? 0)) / weight);
+      break;
+    }
+    for (const [id, mins] of tighten) locked.set(id, mins);
+  }
+
+  const sum = [...locked.values()].reduce((total, mins) => total + mins, 0);
+  if (sum > budget + 0.5) {
+    const scale = budget / sum;
+    for (const [id, mins] of locked) locked.set(id, mins * scale);
+  }
+  return locked;
+}
+
+export function buildPlan(target: Target, startHHMM: string, stops: Stops = DEFAULT_STOPS) {
   const start = parseStart(startHHMM);
   let cursor = start;
   const seg = new Map<string, SegClock>();
   const cps: CpClock[] = [];
   let moving = 0;
   let rest = 0;
+  const allocated = movingMinutes(target, stops);
 
   for (const cp of course.checkpoints) {
-    const minutes = sectionMinutes(cp, target, stretchFinish);
+    const minutes = allocated.get(cp.id) ?? 0;
     const group = course.segments.filter((s) => s.cp === cp.id);
-    const weights = group.map((s) => s.distanceKm * s.effort);
-    const sum = weights.reduce((a, b) => a + b, 0) || 1;
-    group.forEach((s, i) => {
-      const slice = (minutes * weights[i]) / sum;
+    const slices = segmentMinutes(group, minutes);
+    for (const s of group) {
+      const slice = slices.get(s.id) ?? 0;
       const from = cursor;
       cursor += slice;
       seg.set(s.id, { start: from, end: cursor, minutes: slice });
-    });
+    }
     moving += minutes;
     const stop = stopFor(cp.id, stops);
     const arrive = cursor;
@@ -161,6 +256,7 @@ export function buildPlan(
       rest: stop.minutes,
       meal: stop.meal,
       minutes,
+      sheetMinutes: cp.minutes[target],
       gpsSectionKm: cp.gpsSectionKm,
       sheetSectionKm: cp.sheetSectionKm,
     });

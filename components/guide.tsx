@@ -45,15 +45,14 @@ const FILTERS: { id: Filter; label: string }[] = [
 export function Guide() {
   const [target, setTarget] = useState<Target>("18");
   const [start, setStart] = useState("08:00");
-  const [stretchFinish, setStretchFinish] = useState(false);
   const [stops, setStops] = useState<Stops>(DEFAULT_STOPS);
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState<string | null>("s04");
   const [open, setOpen] = useState(false);
 
   const plan = useMemo(
-    () => buildPlan(target, start, stretchFinish, stops),
-    [target, start, stretchFinish, stops],
+    () => buildPlan(target, start, stops),
+    [target, start, stops],
   );
 
   const sunsetKm = kmAtClock(plan, Math.floor(plan.start / 1440) * 1440 + 17 * 60 + 40);
@@ -61,13 +60,6 @@ export function Guide() {
 
   const active = activeId ? segmentById(activeId) : undefined;
   const activeClock = activeId ? plan.seg.get(activeId) : undefined;
-
-  const sheetFinish = courseData.checkpoints.find((c) => c.id === "finish");
-  const stretchedFinishMin =
-    sheetFinish == null
-      ? 0
-      : (sheetFinish.minutes[target] / sheetFinish.sheetSectionKm) * sheetFinish.gpsSectionKm;
-  const slip = stretchedFinishMin - (sheetFinish?.minutes[target] ?? 0);
 
   function openSeg(id: string) {
     setActiveId(id);
@@ -133,30 +125,18 @@ export function Guide() {
         </div>
         <div className="flex flex-col gap-3 border-t border-[#e6dccb] pt-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-6 text-[#3c463f]">
-            行路 {formatDuration(plan.moving)}，休息 {formatDuration(plan.rest)}，完成{" "}
+            完成{" "}
             <span className="font-serif text-xl text-[#1e4636]">{formatClock(plan.finish)}</span>
-            <span className="text-[#5c564c]"> · {formatDuration(plan.total)}</span>
-            {stretchFinish ? "。尾段已按實際 13 公里拉長。" : "。尾段仍然跟表上分鐘。"}
+            <span className="text-[#5c564c]">
+              {" "}
+              · 行路 {formatDuration(plan.moving)}，休息 {formatDuration(plan.rest)}
+            </span>
           </p>
-          <Button
-            type="button"
-            size="sm"
-            variant={stretchFinish ? "default" : "outline"}
-            onClick={() => setStretchFinish((v) => !v)}
-          >
-            {stretchFinish ? "尾段跟緊實際里數" : "尾段改用實際里數"}
-          </Button>
         </div>
         <p className="text-xs leading-5 text-[#5c564c]">
-          表上尾段 {sheetFinish?.minutes[target]} 分鐘行 {sheetFinish?.sheetSectionKm} 公里。實際約{" "}
-          {sheetFinish?.gpsSectionKm} 公里，同一個每公里配速要 {Math.round(stretchedFinishMin)} 分鐘，
-          完成會慢大約 {Math.round(slip)} 分鐘，變成{" "}
-          {formatClock(plan.start + plan.total + (stretchFinish ? 0 : slip))}。
-          如果硬跟表上分鐘，尾段要{" "}
-          {sheetFinish
-            ? (sheetFinish.minutes[target] / sheetFinish.gpsSectionKm).toFixed(1)
-            : "—"}{" "}
-          分一公里，石級做唔到。
+          {target} 小時已經包埋每站休息、午餐同晚餐，所以行路只得 {formatDuration(plan.moving)}。
+          你張表嘅 {target} 小時係純行路，而家每段都要快一截。尾段用真實約 13 公里計，唔再用表上 6.9 公里。
+          平路同長落斜要碎步，山先可以維持而家呢個速度。
         </p>
         <div className="grid gap-4 border-t border-[#e6dccb] pt-3">
           <div>
@@ -215,8 +195,8 @@ export function Guide() {
                 </p>
               )}
               <p className="text-[11px] text-[#5c564c]">
-                {LIGHT_LABEL[light]} · {pace.toFixed(1)} 分/公里
-                {pace < 8 ? " · 偏快" : ""}
+                {LIGHT_LABEL[light]} · 行 {Math.round(cp.minutes)} 分（表上 {cp.sheetMinutes}）· {pace.toFixed(1)} 分/公里
+                {pace < 8 ? " · 要碎步" : ""}
                 {off ? " · 里數同表唔同" : ""}
               </p>
             </li>
@@ -329,7 +309,7 @@ export function Guide() {
                         ? ` · 表上寫 ${cp.sheetSectionKm}`
                         : ""}
                       {clock
-                        ? ` · 到 ${formatClock(clock.arrive)}${clock.rest > 0 ? `，${clock.meal ?? "休息"} ${clock.rest} 分鐘` : ""}`
+                        ? ` · 行 ${Math.round(clock.minutes)} 分（表上 ${clock.sheetMinutes}）· 到 ${formatClock(clock.arrive)}${clock.rest > 0 ? `，${clock.meal ?? "休息"} ${clock.rest} 分鐘` : ""}`
                         : ""}
                     </p>
                   </header>
@@ -442,8 +422,7 @@ export function Guide() {
 
         <TabsContent value="sheet" className="mt-4">
           <p className="mb-3 text-sm leading-6 text-[#3c463f]">
-            你張表：上排係呢段分鐘，下排係 08:00 起步嘅到達時間。到站鐘點跟表；公里改用 2026 GPX。
-            里數差超過 1.5 公里會標出。
+            呢張係你原來嘅表，未扣休息。上面嘅到站鐘先係追 {target} 小時、包埋食飯之後嘅時間。
           </p>
           <div className="overflow-x-auto rounded-2xl border border-[#d9d0c0]">
             <table className="w-full min-w-[760px] border-collapse text-sm">
@@ -589,8 +568,7 @@ export function Guide() {
                 {active.marks.length > 0 && <p>標記：{active.marks.join("、")}</p>}
                 {activeClock.minutes / active.distanceKm < 7 && (
                   <p className="text-[#8a3d22]">
-                    依你張表攤落嚟，呢截要 { (activeClock.minutes / active.distanceKm).toFixed(1) } 分一公里，偏快。
-                    如果係尾段，可以開「尾段改用實際里數」。
+                    呢截要 {(activeClock.minutes / active.distanceKm).toFixed(1)} 分一公里，要碎步先追到。
                   </p>
                 )}
               </div>
