@@ -29,14 +29,47 @@ type Checkpoint = (typeof course.checkpoints)[number];
 type Segment = (typeof course.segments)[number];
 
 export type SegClock = { start: number; end: number; minutes: number };
+export type Meal = "午餐" | "晚餐" | "午晚餐";
+
+export type Stops = {
+  restMin: number;
+  lunchId: string;
+  lunchMin: number;
+  dinnerId: string;
+  dinnerMin: number;
+};
+
+export const DEFAULT_STOPS: Stops = {
+  restMin: 8,
+  lunchId: "cp2",
+  lunchMin: 25,
+  dinnerId: "cp5",
+  dinnerMin: 25,
+};
+
 export type CpClock = {
   id: string;
   name: string;
   arrive: number;
+  depart: number;
+  rest: number;
+  meal: Meal | null;
   minutes: number;
   gpsSectionKm: number;
   sheetSectionKm: number;
 };
+
+export function stopFor(id: string, stops: Stops) {
+  if (id === "finish") return { minutes: 0, meal: null as Meal | null };
+  const lunch = id === stops.lunchId;
+  const dinner = id === stops.dinnerId;
+  if (lunch && dinner) {
+    return { minutes: Math.max(stops.lunchMin, stops.dinnerMin), meal: "午晚餐" as Meal };
+  }
+  if (lunch) return { minutes: stops.lunchMin, meal: "午餐" as Meal };
+  if (dinner) return { minutes: stops.dinnerMin, meal: "晚餐" as Meal };
+  return { minutes: stops.restMin, meal: null as Meal | null };
+}
 
 export function parseStart(hhmm: string) {
   const [h, m] = hhmm.split(":").map(Number);
@@ -91,11 +124,18 @@ function sectionMinutes(cp: Checkpoint, target: Target, stretchFinish: boolean) 
   return sheet;
 }
 
-export function buildPlan(target: Target, startHHMM: string, stretchFinish: boolean) {
+export function buildPlan(
+  target: Target,
+  startHHMM: string,
+  stretchFinish: boolean,
+  stops: Stops = DEFAULT_STOPS,
+) {
   const start = parseStart(startHHMM);
   let cursor = start;
   const seg = new Map<string, SegClock>();
   const cps: CpClock[] = [];
+  let moving = 0;
+  let rest = 0;
 
   for (const cp of course.checkpoints) {
     const minutes = sectionMinutes(cp, target, stretchFinish);
@@ -108,17 +148,25 @@ export function buildPlan(target: Target, startHHMM: string, stretchFinish: bool
       cursor += slice;
       seg.set(s.id, { start: from, end: cursor, minutes: slice });
     });
+    moving += minutes;
+    const stop = stopFor(cp.id, stops);
+    const arrive = cursor;
+    cursor += stop.minutes;
+    rest += stop.minutes;
     cps.push({
       id: cp.id,
       name: cp.name,
-      arrive: cursor,
+      arrive,
+      depart: cursor,
+      rest: stop.minutes,
+      meal: stop.meal,
       minutes,
       gpsSectionKm: cp.gpsSectionKm,
       sheetSectionKm: cp.sheetSectionKm,
     });
   }
 
-  return { start, seg, cps, finish: cursor, total: cursor - start };
+  return { start, seg, cps, finish: cursor, total: cursor - start, moving, rest };
 }
 
 export function kmAtClock(
@@ -127,15 +175,18 @@ export function kmAtClock(
 ): number | null {
   if (clock <= plan.start) return 0;
   if (clock >= plan.finish) return course.stats.distanceKm;
+  let prevKm = 0;
   for (const s of course.segments) {
     const t = plan.seg.get(s.id);
     if (!t) continue;
-    if (clock >= t.start && clock <= t.end) {
+    if (clock < t.start) return prevKm;
+    if (clock <= t.end) {
       const p = t.end === t.start ? 1 : (clock - t.start) / (t.end - t.start);
       return s.fromKm + p * (s.toKm - s.fromKm);
     }
+    prevKm = s.toKm;
   }
-  return null;
+  return prevKm;
 }
 
 export function segmentById(id: string) {

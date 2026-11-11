@@ -15,6 +15,7 @@ import { ProfileChart } from "@/components/profile-chart";
 import {
   buildPlan,
   courseData,
+  DEFAULT_STOPS,
   formatClock,
   formatDuration,
   kmAdvice,
@@ -29,6 +30,7 @@ import {
   TARGETS,
   type Filter,
   type Pace,
+  type Stops,
   type Target,
 } from "@/lib/plan";
 
@@ -44,13 +46,14 @@ export function Guide() {
   const [target, setTarget] = useState<Target>("18");
   const [start, setStart] = useState("08:00");
   const [stretchFinish, setStretchFinish] = useState(false);
+  const [stops, setStops] = useState<Stops>(DEFAULT_STOPS);
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState<string | null>("s04");
   const [open, setOpen] = useState(false);
 
   const plan = useMemo(
-    () => buildPlan(target, start, stretchFinish),
-    [target, start, stretchFinish],
+    () => buildPlan(target, start, stretchFinish, stops),
+    [target, start, stretchFinish, stops],
   );
 
   const sunsetKm = kmAtClock(plan, Math.floor(plan.start / 1440) * 1440 + 17 * 60 + 40);
@@ -130,10 +133,10 @@ export function Guide() {
         </div>
         <div className="flex flex-col gap-3 border-t border-[#e6dccb] pt-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-6 text-[#3c463f]">
-            預計完成{" "}
+            行路 {formatDuration(plan.moving)}，休息 {formatDuration(plan.rest)}，完成{" "}
             <span className="font-serif text-xl text-[#1e4636]">{formatClock(plan.finish)}</span>
             <span className="text-[#5c564c]"> · {formatDuration(plan.total)}</span>
-            {stretchFinish ? "，尾段已按實際 13 公里拉長。" : "，尾段仍然跟表上分鐘。"}
+            {stretchFinish ? "。尾段已按實際 13 公里拉長。" : "。尾段仍然跟表上分鐘。"}
           </p>
           <Button
             type="button"
@@ -155,6 +158,45 @@ export function Guide() {
             : "—"}{" "}
           分一公里，石級做唔到。
         </p>
+        <div className="grid gap-4 border-t border-[#e6dccb] pt-3">
+          <div>
+            <p className="text-xs font-medium tracking-wide text-[#5c564c]">
+              每站休息，上廁所、入水。坐太耐，腳會硬
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {[5, 8, 10, 15].map((mins) => (
+                <Button
+                  key={mins}
+                  type="button"
+                  size="sm"
+                  variant={stops.restMin === mins ? "default" : "outline"}
+                  onClick={() => setStops((s) => ({ ...s, restMin: mins }))}
+                >
+                  {mins} 分鐘
+                </Button>
+              ))}
+            </div>
+          </div>
+          <MealPick
+            label="午餐"
+            hint="預設北潭坳。大約中午到，有路，支援隊交到熱飯。想爬完雞公山先食，改企嶺下。"
+            stationId={stops.lunchId}
+            minutes={stops.lunchMin}
+            onStation={(lunchId) => setStops((s) => ({ ...s, lunchId }))}
+            onMinutes={(lunchMin) => setStops((s) => ({ ...s, lunchMin }))}
+          />
+          <MealPick
+            label="晚餐"
+            hint="預設畢架山。食完加衫、開頭燈，先上針山、草山、大帽山。鉛礦坳先食會太肚餓。"
+            stationId={stops.dinnerId}
+            minutes={stops.dinnerMin}
+            onStation={(dinnerId) => setStops((s) => ({ ...s, dinnerId }))}
+            onMinutes={(dinnerMin) => setStops((s) => ({ ...s, dinnerMin }))}
+          />
+          <p className="text-xs leading-5 text-[#5c564c]">
+            食飯嗰站嘅分鐘已經包括上廁所，唔會再加每站休息。時間由最後一個入站計，四個人要齊。基維爾好容易坐耐，如果唔係食飯站，鐘一到就走。
+          </p>
+        </div>
       </section>
 
       <ol className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
@@ -166,7 +208,12 @@ export function Guide() {
             <li key={cp.id} className="rounded-2xl border border-[#d9d0c0] bg-[#f7f3ea] px-3 py-2">
               <p className="text-[11px] text-[#5c564c]">{cp.id === "finish" ? "終點" : cp.id.toUpperCase()}</p>
               <p className="font-serif text-lg leading-tight">{cp.name}</p>
-              <p className="text-sm tabular-nums">{formatClock(cp.arrive)}</p>
+              <p className="text-sm tabular-nums">到 {formatClock(cp.arrive)}</p>
+              {cp.rest > 0 && (
+                <p className="text-[11px] text-[#8a3d22]">
+                  {cp.meal ?? "休息"} {cp.rest} 分鐘，{formatClock(cp.depart)} 走
+                </p>
+              )}
               <p className="text-[11px] text-[#5c564c]">
                 {LIGHT_LABEL[light]} · {pace.toFixed(1)} 分/公里
                 {pace < 8 ? " · 偏快" : ""}
@@ -281,7 +328,9 @@ export function Guide() {
                       {Math.abs(cp.gpsSectionKm - cp.sheetSectionKm) >= 1.5
                         ? ` · 表上寫 ${cp.sheetSectionKm}`
                         : ""}
-                      {clock ? ` · 到 ${formatClock(clock.arrive)}` : ""}
+                      {clock
+                        ? ` · 到 ${formatClock(clock.arrive)}${clock.rest > 0 ? `，${clock.meal ?? "休息"} ${clock.rest} 分鐘` : ""}`
+                        : ""}
                     </p>
                   </header>
                   <ul className="space-y-2">
@@ -549,6 +598,56 @@ export function Guide() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function MealPick({
+  label,
+  hint,
+  stationId,
+  minutes,
+  onStation,
+  onMinutes,
+}: {
+  label: string;
+  hint: string;
+  stationId: string;
+  minutes: number;
+  onStation: (id: string) => void;
+  onMinutes: (mins: number) => void;
+}) {
+  const stations = courseData.checkpoints.filter((cp) => cp.id !== "finish");
+  return (
+    <div>
+      <p className="text-xs font-medium tracking-wide text-[#5c564c]">{label}</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {stations.map((cp) => (
+          <Button
+            key={cp.id}
+            type="button"
+            size="sm"
+            variant={stationId === cp.id ? "default" : "outline"}
+            onClick={() => onStation(cp.id)}
+          >
+            {cp.name}
+          </Button>
+        ))}
+      </div>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {[15, 20, 25, 30].map((mins) => (
+          <Button
+            key={mins}
+            type="button"
+            size="sm"
+            variant={minutes === mins ? "default" : "outline"}
+            onClick={() => onMinutes(mins)}
+          >
+            {mins} 分鐘
+          </Button>
+        ))}
+      </div>
+      <p className="mt-1 text-xs leading-5 text-[#5c564c]">{hint}</p>
     </div>
   );
 }
