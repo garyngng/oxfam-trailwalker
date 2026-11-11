@@ -1,0 +1,670 @@
+{
+  "meta": {
+    "event": "樂施毅行者 2026",
+    "date": "2026年11月20至22日",
+    "startName": "西貢北潭涌",
+    "finishName": "屯門哈羅香港國際學校",
+    "limitHours": 48,
+    "starts": ["08:00", "09:30", "11:00", "12:30"],
+    "sunset": "17:40",
+    "sunrise": "06:35",
+    "sources": [
+      "樂施會 2026 100公里 GPX（附檢查站）",
+      "樂施會路線說明：M031 經西灣沙灘、大帽山道落扶輪公園、元荃古道至哈羅",
+      "你張 18–28 小時參考時間表，假設 08:00 起步",
+      "朋友四段操練手記：樓梯級數、士多付款、廁所同水機"
+    ]
+  },
+  "distanceNote": "你張表頭兩段寫 10.2 同 15.2 公里，加埋 25.4，同 GPX 去到北潭坳嘅 24.8 幾乎一樣。分開嚟睇，西灣實際約 16.5 公里，北潭坳之前嗰截實際約 8.3 公里。尾段去哈羅實際約 13 公里，表上寫 6.9。下面嘅到達時間用你張表嘅分鐘，釘喺真正嘅檢查站。",
+  "climbNote": "依樂施會 2026 GPX 計，上落大約各 4,900 米。有介紹寫總爬升約 5,300 米，係另一個計法。手機海拔會偏低：大帽山呢條線讀到約 910 米，實峰 957 米；馬鞍山峰頂 702 米唔喺賽道上。",
+  "landmarks": [
+    {"name": "東壩（東霸）", "where": "CP1 之前", "km": 9.7, "segmentId": "s04"},
+    {"name": "浪茄灣", "where": "CP1 之前", "km": 11.5, "segmentId": "s05"},
+    {"name": "西灣山", "where": "CP1 之前", "km": 13.5, "segmentId": "s06"},
+    {"name": "CP1 西灣", "where": "檢查站", "km": 16.5, "segmentId": "s07"},
+    {"name": "鹹田灣", "where": "CP1 去 CP2", "km": 18.5, "segmentId": "s09"},
+    {"name": "大浪灣", "where": "CP1 去 CP2", "km": 19.2, "segmentId": "s10"},
+    {"name": "大浪坳", "where": "CP1 去 CP2", "km": 20.5, "segmentId": "s11"},
+    {"name": "赤徑", "where": "CP1 去 CP2", "km": 22.4, "segmentId": "s12"},
+    {"name": "CP2 北潭坳", "where": "檢查站，北潭凹同一個地方", "km": 24.8, "segmentId": "s13"},
+    {"name": "牛耳石山", "where": "CP2 之後", "km": 26.0, "segmentId": "s14"},
+    {"name": "嶂上", "where": "CP2 去 CP3，朋友寫墇上", "km": 27.6, "segmentId": "s15"},
+    {"name": "雷打石", "where": "CP2 去 CP3", "km": 30.0, "segmentId": "s17"},
+    {"name": "雞公山頂", "where": "CP2 同 CP3 之間，唔係檢查站", "km": 31.5, "segmentId": "s18"},
+    {"name": "CP3 企嶺下", "where": "水浪窩過馬路", "km": 33.9, "segmentId": "s19"},
+    {"name": "馬鞍山山脊", "where": "CP3 去 CP4，峰頂 702 米喺路線側", "km": 38.9, "segmentId": "s22"},
+    {"name": "昂平", "where": "CP3 去 CP4", "km": 40.9, "segmentId": "s23"},
+    {"name": "CP4 基維爾營", "where": "檢查站，朋友寫基圍爾", "km": 46.6, "segmentId": "s25"},
+    {"name": "大老山一帶", "where": "CP4 去 CP5，雷達站入唔到", "km": 48.5, "segmentId": "s26"},
+    {"name": "獅子山", "where": "山腰，郊野公園", "km": 52.2, "segmentId": "s28"},
+    {"name": "畢架山高點", "where": "CP5 之前", "km": 54.4, "segmentId": "s29"},
+    {"name": "CP5 畢架山", "where": "檢查站喺高點下面", "km": 55.2, "segmentId": "s30"},
+    {"name": "CP6 走私坳", "where": "警察射擊場", "km": 59.6, "segmentId": "s32"},
+    {"name": "城門水塘", "where": "CP6 去 CP7", "km": 62.0, "segmentId": "s33"},
+    {"name": "針山", "where": "CP6 同 CP7 之間", "km": 63.8, "segmentId": "s34"},
+    {"name": "草山", "where": "CP6 同 CP7 之間", "km": 67.4, "segmentId": "s36"},
+    {"name": "CP7 鉛礦坳", "where": "檢查站", "km": 68.5, "segmentId": "s37"},
+    {"name": "大帽山", "where": "全段最高，雷達球一帶", "km": 73.2, "segmentId": "s39"},
+    {"name": "CP8 扶輪公園", "where": "唔係大帽山山頂", "km": 77.6, "segmentId": "s41"},
+    {"name": "田夫仔", "where": "CP8 去 CP9", "km": 85.0, "segmentId": "s42b"},
+    {"name": "CP9 吉慶橋", "where": "大欖涌", "km": 87.1, "segmentId": "s43"},
+    {"name": "大棠燒烤場", "where": "路線確認 CP9a", "km": 94.4, "segmentId": "s47"},
+    {"name": "引水道", "where": "終點前", "km": 97.5, "segmentId": "s49"},
+    {"name": "終點 哈羅", "where": "青盈路，你張表寫哈囉", "km": 100.1, "segmentId": "s50"}
+  ],
+  "runnable": [
+    {"km": "7.6–9.7", "name": "東壩", "how": "平路石屎，闊，全段最值得跑。風大、冇遮。", "segmentId": "s04"},
+    {"km": "40.9–42.6", "name": "昂平落茅坪", "how": "路況好，落斜，可以快行。", "segmentId": "s23"},
+    {"km": "59.6–62.2", "name": "落城門水塘", "how": "石屎為主，可以快行，順便補給。", "segmentId": "s33"},
+    {"km": "73.5–77.6", "name": "大帽山道落斜", "how": "車路可以跑，又硬又斜，傷膝。想留膝頭就快行。", "segmentId": "s40"},
+    {"km": "80.2–87.1", "name": "大欖林道去吉慶橋", "how": "80 公里後先至長落。頭 2 公里仍有少少上斜。換跑鞋，水要帶夠。", "segmentId": "s42b"},
+    {"km": "96.3–99.2", "name": "引水道", "how": "平直石屎，可以跑。朋友話行到對腳好實。", "segmentId": "s49"}
+  ],
+  "noRun": [
+    "西灣山，朋友數大約 2000 級",
+    "牛耳石山，650+150+300 級",
+    "雞公山，300+300+50 級",
+    "馬鞍山石級 500+230，山脊倒沙石",
+    "針山，1000+380 級",
+    "草山，朋友話無限斜路",
+    "大帽山上斜，約 1200 級",
+    "大浪坳、赤徑同入基維爾嘅倒沙石",
+    "沙灘：浪茄、西灣、鹹田、大浪灣，沙軟，跑冇着數"
+  ],
+  "checkpoints": [
+    {
+      "id": "cp1",
+      "name": "西灣",
+      "waypoint": "CP1",
+      "sheetSectionKm": 10.2,
+      "minutes": {"18": 164, "20": 180, "22": 186, "24": 192, "26": 198, "28": 204},
+      "blurb": "西灣村。士多只收現金，有廁所。大會通常只係呢站派樽裝水。"
+    },
+    {
+      "id": "cp2",
+      "name": "北潭坳",
+      "waypoint": "CP2",
+      "sheetSectionKm": 15.2,
+      "minutes": {"18": 87, "20": 95, "22": 99, "24": 103, "26": 111, "28": 123},
+      "blurb": "北潭凹同一個坳。廁所、水機。去到之前有倒沙石同搓板路。"
+    },
+    {
+      "id": "cp3",
+      "name": "企嶺下",
+      "waypoint": "CP3",
+      "sheetSectionKm": 8.7,
+      "minutes": {"18": 124, "20": 140, "22": 150, "24": 160, "26": 171, "28": 183},
+      "blurb": "水浪窩過馬路。廁所、水機，朋友話有可樂。雞公山就喺入站之前。"
+    },
+    {
+      "id": "cp4",
+      "name": "基維爾營",
+      "waypoint": "CP4",
+      "sheetSectionKm": 13.7,
+      "minutes": {"18": 143, "20": 155, "22": 177, "24": 199, "26": 222, "28": 246},
+      "blurb": "朋友寫基圍爾。倒沙石上入營地，好容易眼瞓坐耐。講定停留幾多分鐘。"
+    },
+    {
+      "id": "cp5",
+      "name": "畢架山",
+      "waypoint": "CP5",
+      "sheetSectionKm": 7.3,
+      "minutes": {"18": 96, "20": 100, "22": 120, "24": 140, "26": 150, "28": 150},
+      "blurb": "檢查站喺高點下面。你張表 26 同 28 小時都係 150 分鐘，慢計劃係前面送咗時間。"
+    },
+    {
+      "id": "cp6",
+      "name": "走私坳",
+      "waypoint": "CP6",
+      "sheetSectionKm": 6,
+      "minutes": {"18": 61, "20": 65, "22": 57, "24": 49, "26": 54, "28": 72},
+      "blurb": "警察射擊場。金山路上斜，多猴子。你張表 22–24 小時呢段反而快過 20 小時。"
+    },
+    {
+      "id": "cp7",
+      "name": "鉛礦坳",
+      "waypoint": "CP7",
+      "sheetSectionKm": 12,
+      "minutes": {"18": 125, "20": 135, "22": 153, "24": 171, "26": 192, "28": 216},
+      "blurb": "針山同草山之後。廁所、水機，朋友話只得水。上大帽之前加衫。"
+    },
+    {
+      "id": "cp8",
+      "name": "大帽山",
+      "waypoint": "CP8",
+      "sheetSectionKm": 9.4,
+      "minutes": {"18": 107, "20": 125, "22": 141, "24": 157, "26": 168, "28": 174},
+      "blurb": "扶輪公園停車場，唔係山頂。蓮姐有汽水、燒賣。想跑第九段就換跑鞋。"
+    },
+    {
+      "id": "cp9",
+      "name": "大欖涌",
+      "waypoint": "CP9",
+      "sheetSectionKm": 10.6,
+      "minutes": {"18": 86, "20": 100, "22": 114, "24": 128, "26": 138, "28": 144},
+      "blurb": "吉慶橋。之後右手轉元荃古道。見到標距柱 M175 就係行錯。"
+    },
+    {
+      "id": "finish",
+      "name": "哈羅",
+      "waypoint": "FP",
+      "sheetSectionKm": 6.9,
+      "minutes": {"18": 87, "20": 105, "22": 123, "24": 141, "26": 156, "28": 168},
+      "blurb": "屯門哈羅香港國際學校。表上寫 6.9 公里，GPX 大約 13 公里，有石級再有引水道。"
+    }
+  ],
+  "segments": [
+    {
+      "id": "s01", "cp": "cp1", "fromKm": 0, "toKm": 1.3,
+      "name": "北潭涌起步",
+      "pace": "fast", "surface": "石屎", "effort": 0.85,
+      "marks": [], "facilities": ["桶裝水"],
+      "stairs": null,
+      "friend": null,
+      "note": "閘口外出發，石屎緩上，可以慢跑熱身。起點只得桶裝水，自備水樽。唔好因為開頭平就追。"
+    },
+    {
+      "id": "s02", "cp": "cp1", "fromKm": 1.3, "toKm": 6.4,
+      "name": "萬宜水庫邊",
+      "pace": "fast", "surface": "石屎同山徑", "effort": 1.05,
+      "marks": ["破邊洲遠眺"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "有上有落，呢 5 公里爬大約 200 米，未到最斜。平嘅位可以跑少少，上斜就行。腳力留畀西灣山。"
+    },
+    {
+      "id": "s03", "cp": "cp1", "fromKm": 6.4, "toKm": 7.6,
+      "name": "落東壩",
+      "pace": "fast", "surface": "石屎", "effort": 1.0,
+      "marks": [], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "短落，接上壩面。可以快行。"
+    },
+    {
+      "id": "s04", "cp": "cp1", "fromKm": 7.6, "toKm": 9.66,
+      "name": "東壩（東霸）",
+      "pace": "run", "surface": "石屎壩面", "effort": 0.7,
+      "marks": ["東壩"], "facilities": ["廁所"],
+      "stairs": null,
+      "friend": "朋友 09:30–11:00 行到東壩，有廁所。",
+      "note": "東霸就係呢度，大約 9.7 公里，仲未到 CP1。壩面平、闊、硬，全段最應該跑。六角岩柱同破邊洲喺壩尾。冇遮，風大就加衫。歷年有水站，唔係檢查站。"
+    },
+    {
+      "id": "s05", "cp": "cp1", "fromKm": 9.66, "toKm": 11.55,
+      "name": "浪茄灣",
+      "pace": "hike", "surface": "沙灘", "effort": 1.4,
+      "marks": ["浪茄灣"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "離開壩尾會急落，然後落沙。沙軟，行，唔好跑。"
+    },
+    {
+      "id": "s06", "cp": "cp1", "fromKm": 11.55, "toKm": 13.5,
+      "name": "上西灣山",
+      "pace": "grind", "surface": "石級", "effort": 2.6,
+      "marks": ["西灣山"], "facilities": [],
+      "stairs": "大約 2000 級",
+      "friend": "朋友由東壩去西灣標咗 2000 級。",
+      "note": "西灣山高點大約 13.5 公里，實高約 314 米。第一個真正上山。石級急，午後冇海風，好曬。慢慢行，呢度已分出邊隊操得足。"
+    },
+    {
+      "id": "s07", "cp": "cp1", "fromKm": 13.5, "toKm": 16.48,
+      "name": "落西灣村",
+      "pace": "care", "surface": "石級然後沙", "effort": 1.3,
+      "marks": ["CP1 西灣"], "facilities": ["廁所", "士多", "只收現金"],
+      "stairs": null,
+      "friend": "士多 cash only，有廁所。",
+      "note": "長落石級，可以快行，飛落就傷膝。入村前有沙。士多只收現金。大會近年只係 CP1 派樽裝水，其他站係桶裝水，冇杯。"
+    },
+    {
+      "id": "s08", "cp": "cp2", "fromKm": 16.48, "toKm": 17.3,
+      "name": "西灣沙灘過澗",
+      "pace": "hike", "surface": "沙灘", "effort": 1.35,
+      "marks": [], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "2026 同麥徑唔同：標距柱 M031 之後直接經西灣沙灘過澗去 M033。唔好跟麥徑繞上路。沙灘行。"
+    },
+    {
+      "id": "s09", "cp": "cp2", "fromKm": 17.3, "toKm": 18.7,
+      "name": "鹹田灣",
+      "pace": "hike", "surface": "沙灘", "effort": 1.25,
+      "marks": ["鹹田灣"], "facilities": ["士多", "PayMe"],
+      "stairs": null,
+      "friend": "朋友 13:15–13:40 經過，士多 PayMe 得。",
+      "note": "短上再落沙灘。士多可以用 PayMe。沙軟，唔好跑。"
+    },
+    {
+      "id": "s10", "cp": "cp2", "fromKm": 18.7, "toKm": 19.7,
+      "name": "大浪灣",
+      "pace": "fast", "surface": "沙灘", "effort": 1.2,
+      "marks": ["大浪灣"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "長沙灘，平，可以快行。沙軟，跑冇着數，當行快少少。"
+    },
+    {
+      "id": "s11", "cp": "cp2", "fromKm": 19.7, "toKm": 20.55,
+      "name": "上大浪坳",
+      "pace": "grind", "surface": "倒沙石", "effort": 2.2,
+      "marks": ["大浪坳"], "facilities": [],
+      "stairs": null,
+      "friend": "去北潭坳呢截，朋友標咗倒沙石。",
+      "note": "離開沙灘就急上坳口，大約 20.5 公里。倒沙石，腳掌要穩，唔好跑。"
+    },
+    {
+      "id": "s12", "cp": "cp2", "fromKm": 20.55, "toKm": 22.45,
+      "name": "落赤徑",
+      "pace": "care", "surface": "倒沙石", "effort": 1.45,
+      "marks": ["赤徑"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "由坳口落到赤徑。倒沙石落斜，跟麥徑牌。練習日村口有時有舖，比賽日唔好當定有補給。"
+    },
+    {
+      "id": "s13", "cp": "cp2", "fromKm": 22.45, "toKm": 24.75,
+      "name": "上北潭坳",
+      "pace": "hike", "surface": "石屎搓板", "effort": 1.6,
+      "marks": ["CP2 北潭坳"], "facilities": ["廁所", "水機"],
+      "stairs": null,
+      "friend": "朋友 14:15–15:45 到北潭坳，倒沙石，有廁所同水機。",
+      "note": "石屎搓板慢上，腳底好實。北潭坳同北潭凹係同一個地方。檢查站近北潭路，支援隊好易塞。"
+    },
+    {
+      "id": "s14", "cp": "cp3", "fromKm": 24.75, "toKm": 25.95,
+      "name": "牛耳石山",
+      "pace": "grind", "surface": "石級", "effort": 2.7,
+      "marks": ["牛耳石山"], "facilities": [],
+      "stairs": "650+150+300 級",
+      "friend": "第三段一開頭，朋友數 650+150+300 級。",
+      "note": "一出 CP2 就係好斜嘅石級，高點大約 26.0 公里。人多會塞。入黑之後更加慢，頭燈同行山杖有用。唔好跑。"
+    },
+    {
+      "id": "s15", "cp": "cp3", "fromKm": 25.95, "toKm": 27.6,
+      "name": "落嶂上",
+      "pace": "care", "surface": "泥路", "effort": 1.2,
+      "marks": ["嶂上"], "facilities": ["士多", "只收現金", "補水"],
+      "stairs": null,
+      "friend": "朋友寫墇上士多，補水要 cash。",
+      "note": "落到嶂上平地。士多可以補水，朋友話只收現金。比賽日要行經營地，抄捷徑可以取消資格。"
+    },
+    {
+      "id": "s16", "cp": "cp3", "fromKm": 27.6, "toKm": 29.2,
+      "name": "畫眉山山腰",
+      "pace": "hike", "surface": "泥路", "effort": 1.15,
+      "marks": ["畫眉山"], "facilities": [],
+      "stairs": "約 50 級",
+      "friend": "分叉位，50 級加山腰。",
+      "note": "起伏唔大，沿山腰行。分叉多，只跟麥徑牌。"
+    },
+    {
+      "id": "s17", "cp": "cp3", "fromKm": 29.2, "toKm": 30.7,
+      "name": "雷打石、M062",
+      "pace": "grind", "surface": "泥路碎石", "effort": 1.8,
+      "marks": ["雷打石", "M062"], "facilities": [],
+      "stairs": "約 140 級",
+      "friend": "140 級加山腰，去到 M062。",
+      "note": "先落再上雷打石。泥同碎石。M062 喺雞公山正斜之前。"
+    },
+    {
+      "id": "s18", "cp": "cp3", "fromKm": 30.7, "toKm": 31.55,
+      "name": "雞公山",
+      "pace": "grind", "surface": "石級", "effort": 2.8,
+      "marks": ["雞公山頂"], "facilities": [],
+      "stairs": "300+300+50 級",
+      "friend": "朋友 12:05–12:45 上雞公山，300+300+50 級。",
+      "note": "雞公山頂就喺呢截，大約全程 31.5 公里，唔係檢查站。樹多、悶，頂上可以望馬鞍山。一公里內爬一大截。唔好追。"
+    },
+    {
+      "id": "s19", "cp": "cp3", "fromKm": 31.55, "toKm": 33.93,
+      "name": "落水浪窩",
+      "pace": "care", "surface": "石級", "effort": 1.35,
+      "marks": ["CP3 企嶺下", "水浪窩"], "facilities": ["廁所", "水機", "可樂"],
+      "stairs": null,
+      "friend": "朋友話水浪窩有廁所、水機、可樂。",
+      "note": "雞公山長落石級，樹根多，濕就跣。可以快行，唔好放腳飛。落西沙路再上幾級先到檢查站。過馬路小心。"
+    },
+    {
+      "id": "s20", "cp": "cp4", "fromKm": 33.93, "toKm": 36.6,
+      "name": "西沙路再上山",
+      "pace": "up", "surface": "石屎然後泥徑", "effort": 1.65,
+      "marks": [], "facilities": [],
+      "stairs": "約 80 級",
+      "friend": "80 級加斜路，接山路口。",
+      "note": "先係又斜又長嘅車路，再接入泥徑。未到馬鞍山最斜，但已經要行。"
+    },
+    {
+      "id": "s21", "cp": "cp4", "fromKm": 36.6, "toKm": 38.55,
+      "name": "馬鞍山石級",
+      "pace": "grind", "surface": "石級", "effort": 2.5,
+      "marks": ["馬鞍山石級"], "facilities": [],
+      "stairs": "500+230 級",
+      "friend": "朋友數 500+230 級，去到石梯。",
+      "note": "石級直上。越近脊會順少少，仍然唔好跑。"
+    },
+    {
+      "id": "s22", "cp": "cp4", "fromKm": 38.55, "toKm": 40.9,
+      "name": "山脊到昂平",
+      "pace": "hike", "surface": "倒沙石", "effort": 1.7,
+      "marks": ["馬鞍山山脊", "涼亭"], "facilities": [],
+      "stairs": "500+480 級",
+      "friend": "彎曲山脊去涼亭，倒沙石。",
+      "note": "賽道高點大約 38.9 公里。馬鞍山真正山頂 702 米喺路線側，GPX 行山脊同涼亭，冇登頂。倒沙石，彎多。去到昂平有一段可以喘。"
+    },
+    {
+      "id": "s23", "cp": "cp4", "fromKm": 40.9, "toKm": 42.6,
+      "name": "昂平落茅坪",
+      "pace": "fast", "surface": "好路", "effort": 0.95,
+      "marks": ["昂平", "茅坪"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "路況好、落斜、景開揚。第四段少數可以快行拉開嘅位。膝頭唔舒服就收慢。"
+    },
+    {
+      "id": "s24", "cp": "cp4", "fromKm": 42.6, "toKm": 44.3,
+      "name": "黃牛山腰石古道",
+      "pace": "hike", "surface": "石砌古道", "effort": 1.45,
+      "marks": ["黃牛山腰"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "石砌古道，有人叫萬里長城。居高，濕滑，唔好跑。"
+    },
+    {
+      "id": "s25", "cp": "cp4", "fromKm": 44.3, "toKm": 46.58,
+      "name": "上基維爾營",
+      "pace": "grind", "surface": "倒沙石", "effort": 1.95,
+      "marks": ["CP4 基維爾營"], "facilities": [],
+      "stairs": "820+50 級",
+      "friend": "朋友寫上緊基圍爾，820+50 級，倒沙石，好眼瞓。",
+      "note": "落完再上，最後一級一級入營地。基維爾有按摩同熱食嘅年份好容易坐耐。四個人講定停留時間。"
+    },
+    {
+      "id": "s26", "cp": "cp5", "fromKm": 46.58, "toKm": 48.5,
+      "name": "出大老山",
+      "pace": "up", "surface": "車路", "effort": 1.55,
+      "marks": ["大老山", "M094"], "facilities": [],
+      "stairs": "約 480 級",
+      "friend": "M094 車路入麥五，480 級。",
+      "note": "離開營地上大老山一帶，大約 48.5 公里。雷達站入唔到，路線經山側。車路接第五段。"
+    },
+    {
+      "id": "s27", "cp": "cp5", "fromKm": 48.5, "toKm": 50.4,
+      "name": "扎山道落斜",
+      "pace": "care", "surface": "石屎", "effort": 1.15,
+      "marks": ["扎山道"], "facilities": [],
+      "stairs": "約 700 級",
+      "friend": "扎山道 700 級。",
+      "note": "石屎長落，腳底開始實。可以快行，飛落傷膝。活動日呢帶有交通管制。"
+    },
+    {
+      "id": "s28", "cp": "cp5", "fromKm": 50.4, "toKm": 52.4,
+      "name": "獅子山郊野公園",
+      "pace": "hike", "surface": "石級", "effort": 1.5,
+      "marks": ["獅子山"], "facilities": [],
+      "stairs": null,
+      "friend": "朋友 17:55–18:10 行過獅子山郊野公園。",
+      "note": "上落獅子山山腰，大約 52.2 公里。唔係爬個獅頭。夜行跟反光牌，分叉入郊遊徑會走錯。"
+    },
+    {
+      "id": "s29", "cp": "cp5", "fromKm": 52.4, "toKm": 54.45,
+      "name": "沙田坳上畢架山",
+      "pace": "grind", "surface": "石級", "effort": 1.85,
+      "marks": ["畢架山", "風雨亭"], "facilities": ["廁所", "士多"],
+      "stairs": "約 700 級",
+      "friend": "沙田坳道上風雨亭，700 級，有廁所同士多。",
+      "note": "沙田坳補給完再上。畢架山高點大約 54.4 公里，雷達站附近。士多以前試過夜晚唔開，夜晚唔好當定有熱食。"
+    },
+    {
+      "id": "s30", "cp": "cp5", "fromKm": 54.45, "toKm": 55.21,
+      "name": "落去 CP5",
+      "pace": "care", "surface": "石級", "effort": 1.3,
+      "marks": ["CP5 畢架山"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "檢查站唔喺最高點，要再急落一段先到塔旁。朝早 8 點起步、目標 18 小時嘅話，呢度前後開始要頭燈。"
+    },
+    {
+      "id": "s31", "cp": "cp6", "fromKm": 55.21, "toKm": 57.9,
+      "name": "鷹巢山落大埔公路",
+      "pace": "care", "surface": "落石級", "effort": 1.4,
+      "marks": ["鷹巢山", "大埔公路"], "facilities": ["廁所", "水機"],
+      "stairs": "約 730 級",
+      "friend": "大埔公路，730 級，有廁所同水機。",
+      "note": "自然教育徑大約八成係落石級。橫過大埔道一定行天橋，日夜都要。"
+    },
+    {
+      "id": "s32", "cp": "cp6", "fromKm": 57.9, "toKm": 59.64,
+      "name": "金山路上走私坳",
+      "pace": "up", "surface": "柏油", "effort": 1.45,
+      "marks": ["CP6 走私坳", "金山"], "facilities": [],
+      "stairs": null,
+      "friend": "金山路上斜路。",
+      "note": "柏油路上斜，斜度唔細，唔好當平路跑。金山多猴子，唔好餵。走私坳就係警察射擊場。活動日私家車入唔到金山道。"
+    },
+    {
+      "id": "s33", "cp": "cp7", "fromKm": 59.64, "toKm": 62.2,
+      "name": "落城門水塘",
+      "pace": "fast", "surface": "石屎", "effort": 1.0,
+      "marks": ["城門水塘"], "facilities": ["廁所", "水機", "汽水"],
+      "stairs": "約 400 級",
+      "friend": "城門水塘 400 級，有汽水。",
+      "note": "落水塘邊，石屎為主，可以快行。好多支援隊喺呢度補給，因為跟住就係針山、草山、大帽山。"
+    },
+    {
+      "id": "s34", "cp": "cp7", "fromKm": 62.2, "toKm": 63.9,
+      "name": "針山",
+      "pace": "grind", "surface": "石級", "effort": 2.7,
+      "marks": ["針山"], "facilities": [],
+      "stairs": "1000+380 級",
+      "friend": "朋友用大約一個鐘，1000+380 級。",
+      "note": "針山頂大約 63.8 公里。抽筋勝地，石級長，人多會塞。行，唔好跑，唔好追。"
+    },
+    {
+      "id": "s35", "cp": "cp7", "fromKm": 63.9, "toKm": 65.3,
+      "name": "落針山接草山",
+      "pace": "care", "surface": "石級然後斜路", "effort": 1.45,
+      "marks": [], "facilities": [],
+      "stairs": null,
+      "friend": "上草山路口已經係上斜。",
+      "note": "脊上急落，然後接上草山。路口唔好當落完就可以休息。"
+    },
+    {
+      "id": "s36", "cp": "cp7", "fromKm": 65.3, "toKm": 67.45,
+      "name": "草山",
+      "pace": "grind", "surface": "泥路", "effort": 2.4,
+      "marks": ["草山"], "facilities": [],
+      "stairs": null,
+      "friend": "朋友寫草山無限斜路。",
+      "note": "草山頂大約 67.4 公里。斜路長，未見到頂唔好估自己就到。"
+    },
+    {
+      "id": "s37", "cp": "cp7", "fromKm": 67.45, "toKm": 68.47,
+      "name": "落鉛礦坳",
+      "pace": "care", "surface": "泥路", "effort": 1.4,
+      "marks": ["CP7 鉛礦坳"], "facilities": ["廁所", "水機", "只得水"],
+      "stairs": null,
+      "friend": "廁所、水機，水 only。",
+      "note": "急落泥路，濕滑。冇汽水。上大帽之前加衫，山頂冷過山腳好多。"
+    },
+    {
+      "id": "s38", "cp": "cp8", "fromKm": 68.47, "toKm": 72,
+      "name": "上大帽山林道",
+      "pace": "grind", "surface": "林道", "effort": 2.2,
+      "marks": [], "facilities": [],
+      "stairs": "約 1200 級",
+      "friend": "去到大帽山林道，約 1200 級。",
+      "note": "長上斜，大截係林道車路。曝曬、有風。行得穩就得。"
+    },
+    {
+      "id": "s39", "cp": "cp8", "fromKm": 72, "toKm": 73.5,
+      "name": "大帽山波波",
+      "pace": "up", "surface": "車路", "effort": 1.65,
+      "marks": ["大帽山"], "facilities": [],
+      "stairs": null,
+      "friend": "又車路，又斜。",
+      "note": "全段最高大約 73.2 公里，雷達球（波波）一帶。真正三角網 957 米喺路旁。車路繼續斜。CP8 仲未到。"
+    },
+    {
+      "id": "s40", "cp": "cp8", "fromKm": 73.5, "toKm": 76.7,
+      "name": "車閘沿大帽山道落",
+      "pace": "fast", "surface": "石屎落斜", "effort": 0.9,
+      "marks": ["車閘"], "facilities": [],
+      "stairs": null,
+      "friend": "朋友 16:20–16:45 過車閘。",
+      "note": "2026 同麥徑唔同：過車閘之後沿大帽山道車路落，唔好跟左邊樓梯落遊客中心。可以跑，又硬又斜，好傷膝。想留膝頭就快行。"
+    },
+    {
+      "id": "s41", "cp": "cp8", "fromKm": 76.7, "toKm": 77.58,
+      "name": "扶輪公園",
+      "pace": "fast", "surface": "石屎", "effort": 0.85,
+      "marks": ["CP8 扶輪公園"], "facilities": ["廁所", "士多", "汽水", "燒賣"],
+      "stairs": "約 100 級",
+      "friend": "荃錦公路約 100 級。蓮姐有汽水同燒賣。",
+      "note": "檢查站喺扶輪公園停車場，唔係大帽山山頂，亦唔係遊客中心。活動日大帽山道封私家車。第九段想跑，呢度換跑鞋。"
+    },
+    {
+      "id": "s42", "cp": "cp9", "fromKm": 77.58, "toKm": 80.2,
+      "name": "林道再上少少",
+      "pace": "up", "surface": "石屎", "effort": 1.25,
+      "marks": [], "facilities": [],
+      "stairs": null,
+      "friend": "第九段開頭仍係車路。",
+      "note": "出咗扶輪公園未即刻一路落。頭大約 2.5 公里再上到 80 公里附近，行，唔好一換跑鞋就衝。"
+    },
+    {
+      "id": "s42b", "cp": "cp9", "fromKm": 80.2, "toKm": 85.05,
+      "name": "長落田夫仔",
+      "pace": "run", "surface": "石屎緩落", "effort": 0.72,
+      "marks": ["田夫仔"], "facilities": [],
+      "stairs": null,
+      "friend": "去田夫仔牌係車路、落斜。",
+      "note": "80 公里之後長落石屎，係最後可以認真跑嘅一段。單調、硬地，腳會空。沿路冇補給，水要帶夠。"
+    },
+    {
+      "id": "s43", "cp": "cp9", "fromKm": 85.05, "toKm": 87.09,
+      "name": "落吉慶橋",
+      "pace": "run", "surface": "石屎", "effort": 0.8,
+      "marks": ["CP9 吉慶橋"], "facilities": ["廁所", "水"],
+      "stairs": null, "friend": null,
+      "note": "繼續落到吉慶橋野餐位，就係大欖涌檢查站。出站之後唔好入水塘邊舊路。"
+    },
+    {
+      "id": "s44", "cp": "finish", "fromKm": 87.09, "toKm": 89.5,
+      "name": "找出元荃古道",
+      "pace": "up", "surface": "石屎上斜", "effort": 1.25,
+      "marks": ["唔好去 M175"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "過橋沿麥徑上斜幾分鐘，右手轉 C6119。見到 M175 就係行錯，要翻返轉。2026 終點係屯門哈羅，唔係大棠渡假村。"
+    },
+    {
+      "id": "s45", "cp": "finish", "fromKm": 89.5, "toKm": 91.4,
+      "name": "元荃古道石級",
+      "pace": "grind", "surface": "石級", "effort": 1.9,
+      "marks": ["東白虎坳天后廟"], "facilities": [],
+      "stairs": "朋友另數 500+50 級",
+      "friend": "第九、十段有「上水塘梯級口 500+50 級」。2026 呢截係元荃古道，唔係水塘邊舊路。",
+      "note": "石級為主。呢截大約爬 90 米，斜，但未到針山咁急。會經過東白虎坳天后廟。夜行對住 GPX。"
+    },
+    {
+      "id": "s46", "cp": "finish", "fromKm": 91.4, "toKm": 93.3,
+      "name": "石橋同自然教育徑",
+      "pace": "hike", "surface": "泥石", "effort": 1.3,
+      "marks": [], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "幾條石橋，泥石路上落。跟 C6119 到 C6124，分叉唔多，夜行都要對牌。"
+    },
+    {
+      "id": "s47", "cp": "finish", "fromKm": 93.3, "toKm": 94.36,
+      "name": "上大棠燒烤場",
+      "pace": "up", "surface": "石級", "effort": 1.55,
+      "marks": ["大棠燒烤場", "CP9a"], "facilities": ["廁所", "加水"],
+      "stairs": null, "friend": null,
+      "note": "左轉上樓梯入大棠燒烤場。可以加水、上廁所。路線確認，四個人要齊先過。"
+    },
+    {
+      "id": "s48", "cp": "finish", "fromKm": 94.36, "toKm": 96.3,
+      "name": "落斜接回麥徑",
+      "pace": "fast", "surface": "石屎落斜", "effort": 0.95,
+      "marks": ["M178"], "facilities": [],
+      "stairs": null, "friend": null,
+      "note": "燒烤場係呢段附近嘅高點。之後石屎落斜，過管理站同車閘，轉右接回麥徑 M178，落到引水道。可以快行，膝頭唔好放盡。"
+    },
+    {
+      "id": "s49", "cp": "finish", "fromKm": 96.3, "toKm": 99.2,
+      "name": "大欖引水道",
+      "pace": "run", "surface": "石屎平路", "effort": 0.72,
+      "marks": ["引水道"], "facilities": [],
+      "stairs": null,
+      "friend": "朋友 12:30–13:15 行引水道。",
+      "note": "長直石屎，平，可以跑。腳會實。夜行好易悶，跟住路面，去到 M193 附近先準備轉。"
+    },
+    {
+      "id": "s50", "cp": "finish", "fromKm": 99.2, "toKm": 100.09,
+      "name": "落青盈路到哈羅",
+      "pace": "care", "surface": "樓梯然後石屎", "effort": 1.2,
+      "marks": ["終點 哈羅"], "facilities": [],
+      "stairs": null,
+      "friend": "朋友話終點前全石屎，行到對腳好實。",
+      "note": "M193 後、平衡木附近，轉黃色欄杆落樓梯去青盈路，左轉大約兩分鐘到哈羅。最後幾百米會覺得特別長。終點冇泊車，支援隊用黃金海岸或黃金泳灘。"
+    }
+  ],
+  "friendBlocks": [
+    {
+      "id": "a",
+      "title": "麥徑一、二段",
+      "hours": "5.5 小時",
+      "note": "由北潭涌行到北潭坳。鐘點係當日操練，有停留，唔好直接當比賽配速。",
+      "items": [
+        {"clock": "09:30–11:00", "title": "東壩", "detail": "廁所", "segmentId": "s04"},
+        {"clock": "11:00–12:45", "title": "西灣", "detail": "大約 2000 級。士多只收現金，有廁所", "segmentId": "s06"},
+        {"clock": "13:15–13:40", "title": "鹹田灣", "detail": "士多可以用 PayMe", "segmentId": "s09"},
+        {"clock": "14:15–15:45", "title": "北潭坳", "detail": "倒沙石。廁所、水機", "segmentId": "s13"}
+      ]
+    },
+    {
+      "id": "b",
+      "title": "麥徑三、四、五上半",
+      "hours": "6.5 小時",
+      "note": "由北潭坳行到獅子山郊野公園。嶂上朋友寫成墇上，基維爾寫成基圍爾。",
+      "items": [
+        {"clock": "10:15–10:45", "title": "上山段", "detail": "650+150+300 級，牛耳石山", "segmentId": "s14"},
+        {"clock": "10:45–11:00", "title": "嶂上士多", "detail": "補水，只收現金", "segmentId": "s15"},
+        {"clock": "11:20–11:50", "title": "分叉位", "detail": "50 級加山腰", "segmentId": "s16"},
+        {"clock": "11:50–12:05", "title": "M062", "detail": "140 級加山腰", "segmentId": "s17"},
+        {"clock": "12:05–12:45", "title": "雞公山", "detail": "300+300+50 級", "segmentId": "s18"},
+        {"clock": "12:45–13:15", "title": "水浪窩", "detail": "廁所、水機，有可樂", "segmentId": "s19"},
+        {"clock": "13:00–14:05", "title": "接山路口", "detail": "80 級加斜路", "segmentId": "s20"},
+        {"clock": "14:05–14:45", "title": "石梯", "detail": "500+230 級", "segmentId": "s21"},
+        {"clock": "14:45–15:35", "title": "彎曲山脊", "detail": "500+480 級，涼亭，倒沙石", "segmentId": "s22"},
+        {"clock": "15:35–16:50", "title": "上基維爾", "detail": "820+50 級，倒沙石，好眼瞓", "segmentId": "s25"},
+        {"clock": "17:00–17:15", "title": "M094", "detail": "480 級，車路入第五段", "segmentId": "s26"},
+        {"clock": "17:20–17:50", "title": "扎山道", "detail": "約 700 級", "segmentId": "s27"},
+        {"clock": "17:55–18:10", "title": "獅子山郊野公園", "detail": "行過山腰", "segmentId": "s28"}
+      ]
+    },
+    {
+      "id": "c",
+      "title": "五下半、六、七、八段",
+      "hours": "8 小時",
+      "note": "由沙田坳行到荃錦。針山、草山、大帽山連續上，鉛礦坳只得水。",
+      "items": [
+        {"clock": "08:50–09:30", "title": "沙田坳上風雨亭", "detail": "約 700 級。廁所、士多", "segmentId": "s29"},
+        {"clock": "09:30–10:40", "title": "大埔公路", "detail": "約 730 級。廁所、水機", "segmentId": "s31"},
+        {"clock": "10:45–11:15", "title": "金山路", "detail": "上斜，唔好鬆", "segmentId": "s32"},
+        {"clock": "11:15–11:40", "title": "城門水塘", "detail": "約 400 級。廁所、水機，有汽水", "segmentId": "s33"},
+        {"clock": "12:00–13:00", "title": "針山", "detail": "1000+380 級", "segmentId": "s34"},
+        {"clock": "13:00–13:15", "title": "上草山路口", "detail": "已經係上斜", "segmentId": "s35"},
+        {"clock": "13:30–14:00", "title": "草山", "detail": "無限斜路", "segmentId": "s36"},
+        {"clock": "14:00–14:15", "title": "鉛礦坳", "detail": "廁所、水機，只得水", "segmentId": "s37"},
+        {"clock": "14:45–15:45", "title": "大帽山林道", "detail": "約 1200 級", "segmentId": "s38"},
+        {"clock": "15:45–16:20", "title": "大帽山波波", "detail": "又車路又斜", "segmentId": "s39"},
+        {"clock": "16:20–16:45", "title": "車閘", "detail": "2026 過閘沿大帽山道落", "segmentId": "s40"},
+        {"clock": "16:50–17:45", "title": "荃錦、扶輪", "detail": "約 100 級。蓮姐有汽水、燒賣。廁所、士多", "segmentId": "s41"}
+      ]
+    },
+    {
+      "id": "d",
+      "title": "九、十段",
+      "hours": "4 小時",
+      "note": "朋友尾段有引水道同全石屎，同 2026 最後幾公里重合。中間 2026 要轉元荃古道經大棠，見到 M175 就係行錯，唔好沿水塘邊一直出。",
+      "items": [
+        {"clock": "10:15–11:30", "title": "田夫仔牌", "detail": "車路。開頭再上少少，之後落斜", "segmentId": "s42b"},
+        {"clock": "11:30–12:20", "title": "上水塘梯級口", "detail": "500+50 級。2026 對應元荃古道石級", "segmentId": "s45"},
+        {"clock": "12:30–13:15", "title": "引水道", "detail": "長直石屎", "segmentId": "s49"},
+        {"clock": "13:15–14:15", "title": "終點", "detail": "石屎路，行到對腳好實", "segmentId": "s50"}
+      ]
+    }
+  ]
+}

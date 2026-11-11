@@ -1,0 +1,572 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProfileChart } from "@/components/profile-chart";
+import {
+  buildPlan,
+  courseData,
+  formatClock,
+  formatDuration,
+  kmAdvice,
+  kmAtClock,
+  LIGHT_LABEL,
+  lightOf,
+  matches,
+  PACE_COLOR,
+  PACE_LABEL,
+  segmentById,
+  segmentsFor,
+  TARGETS,
+  type Filter,
+  type Pace,
+  type Target,
+} from "@/lib/plan";
+
+const FILTERS: { id: Filter; label: string }[] = [
+  { id: "all", label: "全部" },
+  { id: "run", label: "可跑／快行" },
+  { id: "climb", label: "上山" },
+  { id: "down", label: "落山" },
+  { id: "supply", label: "有補給" },
+];
+
+export function Guide() {
+  const [target, setTarget] = useState<Target>("18");
+  const [start, setStart] = useState("08:00");
+  const [stretchFinish, setStretchFinish] = useState(false);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [activeId, setActiveId] = useState<string | null>("s04");
+  const [open, setOpen] = useState(false);
+
+  const plan = useMemo(
+    () => buildPlan(target, start, stretchFinish),
+    [target, start, stretchFinish],
+  );
+
+  const sunsetKm = kmAtClock(plan, Math.floor(plan.start / 1440) * 1440 + 17 * 60 + 40);
+  const nightKm = sunsetKm != null && lightOf(plan.start) === "night" ? 0 : sunsetKm;
+
+  const active = activeId ? segmentById(activeId) : undefined;
+  const activeClock = activeId ? plan.seg.get(activeId) : undefined;
+
+  const sheetFinish = courseData.checkpoints.find((c) => c.id === "finish");
+  const stretchedFinishMin =
+    sheetFinish == null
+      ? 0
+      : (sheetFinish.minutes[target] / sheetFinish.sheetSectionKm) * sheetFinish.gpsSectionKm;
+  const slip = stretchedFinishMin - (sheetFinish?.minutes[target] ?? 0);
+
+  function openSeg(id: string) {
+    setActiveId(id);
+    setOpen(true);
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 pb-20 pt-6 sm:px-6">
+      <header className="overflow-hidden rounded-[28px] bg-[#132e24] text-[#f6f1e6] shadow-[0_24px_60px_-36px_rgba(19,46,36,0.9)]">
+        <div className="grid gap-6 px-5 py-6 sm:px-8 sm:py-8 lg:grid-cols-[1.3fr_0.7fr]">
+          <div>
+            <p className="text-xs tracking-[0.22em] text-[#e2c27a]">OXFAM TRAILWALKER 2026</p>
+            <h1 className="font-serif mt-2 text-4xl leading-tight sm:text-5xl">全段分析</h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[#e7dece] sm:text-base">
+              北潭涌去屯門哈羅，{courseData.stats.distanceKm} 公里，上落大約各{" "}
+              {courseData.stats.gain.toLocaleString("zh-HK")} 米。下面按小段講幾時上、幾時落、邊度可以跑。
+            </p>
+            <p className="mt-4 text-sm leading-6 text-[#f3c56b]">{courseData.distanceNote}</p>
+          </div>
+          <dl className="grid grid-cols-2 gap-3 self-end text-sm">
+            <Stat k="檢查站" v="9 個 + 終點" />
+            <Stat k="小段" v={`${courseData.segments.length} 段`} />
+            <Stat k="限時" v="48 小時" />
+            <Stat k="比賽日" v="11月20–22日" />
+          </dl>
+        </div>
+      </header>
+
+      <section className="mt-6 grid gap-4 rounded-3xl border border-[#d9d0c0] bg-[#f7f3ea]/90 p-4 sm:p-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-medium tracking-wide text-[#5c564c]">目標時間</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {TARGETS.map((t) => (
+                <Button
+                  key={t}
+                  type="button"
+                  size="sm"
+                  variant={target === t ? "default" : "outline"}
+                  onClick={() => setTarget(t)}
+                >
+                  {t} 小時
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-medium tracking-wide text-[#5c564c]">起步，2026 四個時段</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {courseData.meta.starts.map((s) => (
+                <Button
+                  key={s}
+                  type="button"
+                  size="sm"
+                  variant={start === s ? "default" : "outline"}
+                  onClick={() => setStart(s)}
+                >
+                  {s}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3 border-t border-[#e6dccb] pt-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm leading-6 text-[#3c463f]">
+            預計完成{" "}
+            <span className="font-serif text-xl text-[#1e4636]">{formatClock(plan.finish)}</span>
+            <span className="text-[#5c564c]"> · {formatDuration(plan.total)}</span>
+            {stretchFinish ? "，尾段已按實際 13 公里拉長。" : "，尾段仍然跟表上分鐘。"}
+          </p>
+          <Button
+            type="button"
+            size="sm"
+            variant={stretchFinish ? "default" : "outline"}
+            onClick={() => setStretchFinish((v) => !v)}
+          >
+            {stretchFinish ? "尾段跟緊實際里數" : "尾段改用實際里數"}
+          </Button>
+        </div>
+        <p className="text-xs leading-5 text-[#5c564c]">
+          表上尾段 {sheetFinish?.minutes[target]} 分鐘行 {sheetFinish?.sheetSectionKm} 公里。實際約{" "}
+          {sheetFinish?.gpsSectionKm} 公里，同一個每公里配速要 {Math.round(stretchedFinishMin)} 分鐘，
+          完成會慢大約 {Math.round(slip)} 分鐘，變成{" "}
+          {formatClock(plan.start + plan.total + (stretchFinish ? 0 : slip))}。
+          如果硬跟表上分鐘，尾段要{" "}
+          {sheetFinish
+            ? (sheetFinish.minutes[target] / sheetFinish.gpsSectionKm).toFixed(1)
+            : "—"}{" "}
+          分一公里，石級做唔到。
+        </p>
+      </section>
+
+      <ol className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+        {plan.cps.map((cp) => {
+          const light = lightOf(cp.arrive);
+          const pace = cp.minutes / cp.gpsSectionKm;
+          const off = Math.abs(cp.sheetSectionKm - cp.gpsSectionKm) >= 1.5;
+          return (
+            <li key={cp.id} className="rounded-2xl border border-[#d9d0c0] bg-[#f7f3ea] px-3 py-2">
+              <p className="text-[11px] text-[#5c564c]">{cp.id === "finish" ? "終點" : cp.id.toUpperCase()}</p>
+              <p className="font-serif text-lg leading-tight">{cp.name}</p>
+              <p className="text-sm tabular-nums">{formatClock(cp.arrive)}</p>
+              <p className="text-[11px] text-[#5c564c]">
+                {LIGHT_LABEL[light]} · {pace.toFixed(1)} 分/公里
+                {pace < 8 ? " · 偏快" : ""}
+                {off ? " · 里數同表唔同" : ""}
+              </p>
+            </li>
+          );
+        })}
+      </ol>
+
+      <section className="mt-8 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-3xl border border-[#d9d0c0] bg-[#f7f3ea] p-4 sm:p-5">
+          <h2 className="font-serif text-2xl">邊度可以跑</h2>
+          <ul className="mt-3 space-y-3">
+            {courseData.runnable.map((item) => (
+              <li key={item.name}>
+                <button
+                  type="button"
+                  className="w-full rounded-2xl bg-[#e7efe8] px-3 py-3 text-left hover:bg-[#dce8de]"
+                  onClick={() => openSeg(item.segmentId)}
+                >
+                  <span className="flex items-baseline justify-between gap-3">
+                    <span className="font-medium">{item.name}</span>
+                    <span className="text-xs tabular-nums text-[#1e4636]">{item.km} 公里</span>
+                  </span>
+                  <span className="mt-1 block text-sm leading-6 text-[#3c463f]">{item.how}</span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-3xl border border-[#ead8c8] bg-[#fbf4ee] p-4 sm:p-5">
+          <h2 className="font-serif text-2xl text-[#8a3d22]">唔好跑</h2>
+          <ul className="mt-3 space-y-2 text-sm leading-6">
+            {courseData.noRun.map((item) => (
+              <li key={item} className="border-b border-[#ead8c8] pb-2 last:border-0">
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs leading-5 text-[#5c564c]">
+            樓梯級數係朋友操練手記數嘅，唔係官方測量。沙灘同倒沙石跑完只會更慢。
+          </p>
+        </div>
+      </section>
+
+      <section className="mt-8">
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <h2 className="font-serif text-2xl">邊個位</h2>
+          <p className="text-xs text-[#5c564c]">撳個名去嗰段</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {courseData.landmarks.map((mark) => (
+            <button
+              key={mark.name}
+              type="button"
+              onClick={() => openSeg(mark.segmentId)}
+              className="rounded-full border border-[#d9d0c0] bg-[#f7f3ea] px-3 py-1.5 text-left text-sm hover:border-[#1e4636]"
+            >
+              <span className="font-medium">{mark.name}</span>
+              <span className="ml-2 tabular-nums text-[#5c564c]">{mark.km}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div className="mt-8">
+        <ProfileChart
+          activeId={activeId}
+          nightKm={nightKm}
+          onPick={openSeg}
+        />
+        <p className="mt-2 text-xs leading-5 text-[#5c564c]">{courseData.climbNote}</p>
+      </div>
+
+      <Tabs defaultValue="segments" className="mt-8">
+        <TabsList className="h-auto w-full flex-wrap justify-start bg-[#e6dccb] p-1">
+          <TabsTrigger value="segments">小段</TabsTrigger>
+          <TabsTrigger value="km">每一公里</TabsTrigger>
+          <TabsTrigger value="sheet">時間表</TabsTrigger>
+          <TabsTrigger value="friend">朋友手記</TabsTrigger>
+          <TabsTrigger value="where">地名對照</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="segments" className="mt-4">
+          <div className="mb-3 flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <Button
+                key={f.id}
+                type="button"
+                size="sm"
+                variant={filter === f.id ? "default" : "outline"}
+                onClick={() => setFilter(f.id)}
+              >
+                {f.label}
+              </Button>
+            ))}
+          </div>
+          <div className="space-y-6">
+            {courseData.checkpoints.map((cp) => {
+              const rows = segmentsFor(cp.id).filter((s) => matches(s, filter));
+              if (rows.length === 0) return null;
+              const clock = plan.cps.find((c) => c.id === cp.id);
+              return (
+                <section key={cp.id}>
+                  <header className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                    <h3 className="font-serif text-xl">
+                      {cp.id === "finish" ? "終點" : cp.id.toUpperCase()} {cp.name}
+                    </h3>
+                    <p className="text-xs text-[#5c564c]">
+                      GPX {cp.gpsSectionKm} 公里
+                      {Math.abs(cp.gpsSectionKm - cp.sheetSectionKm) >= 1.5
+                        ? ` · 表上寫 ${cp.sheetSectionKm}`
+                        : ""}
+                      {clock ? ` · 到 ${formatClock(clock.arrive)}` : ""}
+                    </p>
+                  </header>
+                  <ul className="space-y-2">
+                    {rows.map((seg) => {
+                      const t = plan.seg.get(seg.id);
+                      const pace = seg.pace as Pace;
+                      const when = t ? lightOf((t.start + t.end) / 2) : "day";
+                      return (
+                        <li key={seg.id}>
+                          <button
+                            type="button"
+                            onClick={() => openSeg(seg.id)}
+                            className="grid w-full grid-cols-[4.5rem_1fr] gap-3 rounded-2xl border border-[#d9d0c0] bg-[#f7f3ea] px-3 py-3 text-left hover:border-[#1e4636] sm:grid-cols-[6rem_1fr_auto]"
+                          >
+                            <span className="tabular-nums text-xs leading-5 text-[#5c564c]">
+                              {seg.fromKm.toFixed(1)}
+                              <br />
+                              {seg.toKm.toFixed(1)} 公里
+                            </span>
+                            <span>
+                              <span className="flex flex-wrap items-center gap-2">
+                                <span className="font-medium">{seg.name}</span>
+                                <Badge
+                                  variant="outline"
+                                  style={{
+                                    borderColor: PACE_COLOR[pace],
+                                    color: PACE_COLOR[pace],
+                                  }}
+                                >
+                                  {PACE_LABEL[pace]}
+                                </Badge>
+                                {when !== "day" && (
+                                  <Badge variant="secondary">{LIGHT_LABEL[when]}</Badge>
+                                )}
+                              </span>
+                              <span className="mt-1 block text-sm leading-6 text-[#3c463f]">
+                                {seg.note}
+                              </span>
+                            </span>
+                            <span className="col-start-2 text-xs text-[#5c564c] sm:col-start-auto sm:text-right">
+                              {t ? `${formatClock(t.start)} – ${formatClock(t.end)}` : ""}
+                              <br />+{seg.gain} / −{seg.loss} 米
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="km" className="mt-4">
+          <div className="overflow-x-auto rounded-2xl border border-[#d9d0c0]">
+            <table className="w-full min-w-[640px] border-collapse text-sm">
+              <thead className="bg-[#132e24] text-left text-[#f6f1e6]">
+                <tr>
+                  <th className="px-3 py-2 font-medium">公里</th>
+                  <th className="px-3 py-2 font-medium">海拔</th>
+                  <th className="px-3 py-2 font-medium">升 / 降</th>
+                  <th className="px-3 py-2 font-medium">路況</th>
+                  <th className="px-3 py-2 font-medium">屬於</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courseData.kms.map((row) => {
+                  const seg = row.segmentId ? segmentById(row.segmentId) : undefined;
+                  const advice = seg
+                    ? kmAdvice(row.grade, seg.pace as Pace, seg.surface)
+                    : { word: "—", run: false };
+                  return (
+                    <tr key={row.km} className="border-t border-[#e6dccb] odd:bg-[#f7f3ea]">
+                      <td className="px-3 py-2 tabular-nums">
+                        {row.km}–{row.toKm}
+                      </td>
+                      <td className="px-3 py-2 tabular-nums">
+                        {row.eleStart} → {row.eleEnd}
+                      </td>
+                      <td className="px-3 py-2 tabular-nums">
+                        +{row.gain} / −{row.loss}
+                      </td>
+                      <td className="px-3 py-2">
+                        <span style={{ color: advice.run ? PACE_COLOR.run : undefined }}>
+                          {advice.word}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        {seg ? (
+                          <button
+                            type="button"
+                            className="underline decoration-[#d9d0c0] underline-offset-4 hover:decoration-[#1e4636]"
+                            onClick={() => openSeg(seg.id)}
+                          >
+                            {seg.name}
+                          </button>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="sheet" className="mt-4">
+          <p className="mb-3 text-sm leading-6 text-[#3c463f]">
+            你張表：上排係呢段分鐘，下排係 08:00 起步嘅到達時間。到站鐘點跟表；公里改用 2026 GPX。
+            里數差超過 1.5 公里會標出。
+          </p>
+          <div className="overflow-x-auto rounded-2xl border border-[#d9d0c0]">
+            <table className="w-full min-w-[760px] border-collapse text-sm">
+              <thead className="bg-[#132e24] text-left text-[#f6f1e6]">
+                <tr>
+                  <th className="px-3 py-2 font-medium">站</th>
+                  <th className="px-3 py-2 font-medium">表上 / GPX</th>
+                  {TARGETS.map((t) => (
+                    <th key={t} className="px-3 py-2 font-medium">
+                      {t}h
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {courseData.checkpoints.map((cp) => {
+                  const off = Math.abs(cp.sheetSectionKm - cp.gpsSectionKm) >= 1.5;
+                  return (
+                    <tr key={cp.id} className="border-t border-[#e6dccb] align-top odd:bg-[#f7f3ea]">
+                      <td className="px-3 py-2">
+                        <div className="font-medium">{cp.name}</div>
+                        <div className="text-xs text-[#5c564c]">{cp.blurb}</div>
+                      </td>
+                      <td className={`px-3 py-2 tabular-nums ${off ? "text-[#8a3d22]" : ""}`}>
+                        {cp.sheetSectionKm} / {cp.gpsSectionKm} 公里
+                      </td>
+                      {TARGETS.map((t) => {
+                        const mins = cp.minutes[t];
+                        const arrive = sheetArrival(cp.id, t);
+                        const pace = mins / cp.gpsSectionKm;
+                        return (
+                          <td key={t} className="px-3 py-2 tabular-nums">
+                            <div>{mins} 分</div>
+                            <div className="text-xs text-[#5c564c]">{formatClock(arrive)}</div>
+                            <div className={`text-[11px] ${pace < 8 ? "text-[#8a3d22]" : "text-[#5c564c]"}`}>
+                              {pace.toFixed(1)} 分/公里
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-[#5c564c]">
+            到達時間一欄假設 08:00 起步，同你張表一樣，未有計尾段拉長。
+          </p>
+        </TabsContent>
+
+        <TabsContent value="friend" className="mt-4 space-y-4">
+          <p className="text-sm leading-6">
+            朋友四段操練可以參考路感、樓梯同邊度有士多。鐘點係當日練習，有站低，唔好直接當比賽配速。
+          </p>
+          {courseData.friendBlocks.map((block) => (
+            <section key={block.id} className="rounded-3xl border border-[#d9d0c0] bg-[#f7f3ea] p-4">
+              <header className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="font-serif text-xl">{block.title}</h3>
+                <p className="text-sm text-[#5c564c]">操練大約 {block.hours}</p>
+              </header>
+              <p className="mt-1 text-sm leading-6 text-[#3c463f]">{block.note}</p>
+              <ul className="mt-3 divide-y divide-[#e6dccb]">
+                {block.items.map((item) => (
+                  <li key={`${block.id}-${item.clock}-${item.title}`} className="flex flex-wrap gap-3 py-2 text-sm">
+                    <span className="w-28 shrink-0 tabular-nums text-[#5c564c]">{item.clock}</span>
+                    <button
+                      type="button"
+                      className="text-left hover:underline"
+                      onClick={() => openSeg(item.segmentId)}
+                    >
+                      <span className="font-medium">{item.title}</span>
+                      <span className="mt-0.5 block text-[#3c463f]">{item.detail}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="where" className="mt-4">
+          <div className="overflow-x-auto rounded-2xl border border-[#d9d0c0]">
+            <table className="w-full min-w-[520px] border-collapse text-sm">
+              <thead className="bg-[#132e24] text-left text-[#f6f1e6]">
+                <tr>
+                  <th className="px-3 py-2 font-medium">地方</th>
+                  <th className="px-3 py-2 font-medium">邊度</th>
+                  <th className="px-3 py-2 font-medium">公里</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courseData.landmarks.map((mark) => (
+                  <tr key={mark.name} className="border-t border-[#e6dccb] odd:bg-[#f7f3ea]">
+                    <td className="px-3 py-2">
+                      <button type="button" className="font-medium hover:underline" onClick={() => openSeg(mark.segmentId)}>
+                        {mark.name}
+                      </button>
+                    </td>
+                    <td className="px-3 py-2 text-[#3c463f]">{mark.where}</td>
+                    <td className="px-3 py-2 tabular-nums">{mark.km}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <footer className="mt-10 space-y-2 text-xs leading-5 text-[#5c564c]">
+        {courseData.meta.sources.map((s) => (
+          <p key={s}>{s}</p>
+        ))}
+        <p>
+          路線同年會變。關門時間、熱食、封路以樂施會當年手冊為準。呢份係行路參考，唔係官方分段。
+        </p>
+      </footer>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg">
+          {active && activeClock && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="font-serif text-xl">{active.name}</DialogTitle>
+                <DialogDescription>
+                  {active.fromKm.toFixed(1)}–{active.toKm.toFixed(1)} 公里 · {active.surface} ·{" "}
+                  {PACE_LABEL[active.pace as Pace]}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3 text-sm leading-6">
+                <p>{active.note}</p>
+                <p className="tabular-nums text-[#3c463f]">
+                  {formatClock(activeClock.start)} 到 {formatClock(activeClock.end)} ·{" "}
+                  {Math.round(activeClock.minutes)} 分鐘 · {LIGHT_LABEL[lightOf((activeClock.start + activeClock.end) / 2)]}
+                  <br />
+                  爬 {active.gain} 米，落 {active.loss} 米，海拔 {active.eleStart} → {active.eleEnd}
+                </p>
+                {active.stairs && <p>樓梯：{active.stairs}</p>}
+                {active.friend && <p className="rounded-xl bg-[#efe2cf] px-3 py-2">操練：{active.friend}</p>}
+                {active.facilities.length > 0 && (
+                  <p>附近：{active.facilities.join("、")}</p>
+                )}
+                {active.marks.length > 0 && <p>標記：{active.marks.join("、")}</p>}
+                {activeClock.minutes / active.distanceKm < 7 && (
+                  <p className="text-[#8a3d22]">
+                    依你張表攤落嚟，呢截要 { (activeClock.minutes / active.distanceKm).toFixed(1) } 分一公里，偏快。
+                    如果係尾段，可以開「尾段改用實際里數」。
+                  </p>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function sheetArrival(cpId: string, target: Target) {
+  let cursor = 8 * 60;
+  for (const cp of courseData.checkpoints) {
+    cursor += cp.minutes[target];
+    if (cp.id === cpId) return cursor;
+  }
+  return cursor;
+}
+
+function Stat({ k, v }: { k: string; v: string }) {
+  return (
+    <div className="rounded-2xl bg-white/5 px-3 py-3">
+      <dt className="text-[11px] text-[#d5cbb8]">{k}</dt>
+      <dd className="font-serif text-lg">{v}</dd>
+    </div>
+  );
+}
