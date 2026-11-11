@@ -15,6 +15,8 @@ npm run dev
 
 然後開 [http://127.0.0.1:4179](http://127.0.0.1:4179)。
 
+發佈版喺 [https://garyngng.github.io/oxfam-trailwalker/](https://garyngng.github.io/oxfam-trailwalker/)。推上 `main` 之後，GitHub Actions 會重建個網。
+
 可以揀 18 至 28 小時，同 2026 四個起步時間。尾段如果想按實際大約 13 公里計，而唔係表上 6.9 公里，撳「尾段改用實際里數」。
 
 ## 資料

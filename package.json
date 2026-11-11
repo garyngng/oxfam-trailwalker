@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack -p 4179 -H 0.0.0.0",
     "build": "next build --turbopack",
+    "build:pages": "GITHUB_PAGES=true next build",
     "start": "next start -p 4179 -H 0.0.0.0",
     "lint": "eslint"
   },

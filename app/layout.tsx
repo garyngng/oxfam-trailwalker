@@ -1,20 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_TC, Noto_Serif_TC } from "next/font/google";
 import "./globals.css";
-
-const sans = Noto_Sans_TC({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  variable: "--font-noto-sans",
-  display: "swap",
-});
-
-const serif = Noto_Serif_TC({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-  variable: "--font-noto-serif",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "毅行者全段分析",
@@ -28,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-Hant" className={`${sans.variable} ${serif.variable}`}>
+    <html lang="zh-Hant">
       <body className="antialiased">{children}</body>
     </html>
   );
