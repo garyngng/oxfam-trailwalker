@@ -1,0 +1,8 @@
+---
+description: Use Modern Web Guidance before any webpage, HTML, CSS, or client-side UI change
+alwaysApply: true
+---
+
+When the task creates or changes a webpage, HTML, CSS, or client-side UI, follow `AGENTS.md` and the Modern Web Guidance skill at https://github.com/googlechrome/modern-web-guidance before writing the interface.
+
+Run `npx -y modern-web-guidance@latest search` and `retrieve` first. Apply the retrieved guides, including their fallbacks. Do not skip this for layout, dialogs, tables, tabs, forms, accessibility, or performance.

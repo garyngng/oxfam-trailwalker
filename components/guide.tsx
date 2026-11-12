@@ -1,16 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChoiceSet } from "@/components/choice-set";
+import { CourseTabs } from "@/components/course-tabs";
+import { DataTable } from "@/components/data-table";
 import { ProfileChart } from "@/components/profile-chart";
 import {
   buildPlan,
@@ -50,6 +44,7 @@ export function Guide() {
   const [filter, setFilter] = useState<Filter>("all");
   const [activeId, setActiveId] = useState<string | null>("s04");
   const [open, setOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   const plan = useMemo(
     () => buildPlan(target, start, stops),
@@ -62,6 +57,43 @@ export function Guide() {
   const active = activeId ? segmentById(activeId) : undefined;
   const activeClock = activeId ? plan.seg.get(activeId) : undefined;
 
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && active) {
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) {
+      dialog.close();
+    }
+  }, [open, active]);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog || "closedBy" in HTMLDialogElement.prototype) return;
+    const outside = (event: PointerEvent) => {
+      const rect = dialog.getBoundingClientRect();
+      return (
+        event.clientX < rect.left ||
+        event.clientX > rect.right ||
+        event.clientY < rect.top ||
+        event.clientY > rect.bottom
+      );
+    };
+    let pressedOutside = false;
+    const onDown = (event: PointerEvent) => {
+      pressedOutside = outside(event);
+    };
+    const onUp = (event: PointerEvent) => {
+      if (pressedOutside && outside(event)) dialog.close();
+    };
+    dialog.addEventListener("pointerdown", onDown);
+    dialog.addEventListener("pointerup", onUp);
+    return () => {
+      dialog.removeEventListener("pointerdown", onDown);
+      dialog.removeEventListener("pointerup", onUp);
+    };
+  }, []);
+
   function openSeg(id: string) {
     setActiveId(id);
     setOpen(true);
@@ -69,6 +101,9 @@ export function Guide() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-20 pt-6 sm:px-6">
+      <a className="skip-link" href="#planner">
+        跳到行程
+      </a>
       <header className="overflow-hidden rounded-[28px] bg-[#132e24] text-[#f6f1e6] shadow-[0_24px_60px_-36px_rgba(19,46,36,0.9)]">
         <div className="grid gap-6 px-5 py-6 sm:px-8 sm:py-8 lg:grid-cols-[1.3fr_0.7fr]">
           <div>
@@ -89,40 +124,26 @@ export function Guide() {
         </div>
       </header>
 
+      <main>
       <section className="mt-6 grid gap-4 rounded-3xl border border-[#d9d0c0] bg-[#f7f3ea]/90 p-4 sm:p-5">
+        <h2 id="planner" tabIndex={-1} className="font-serif text-2xl">
+          行程
+        </h2>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-medium tracking-wide text-[#5c564c]">目標時間</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {TARGETS.map((t) => (
-                <Button
-                  key={t}
-                  type="button"
-                  size="sm"
-                  variant={target === t ? "default" : "outline"}
-                  onClick={() => setTarget(t)}
-                >
-                  {t} 小時
-                </Button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="text-xs font-medium tracking-wide text-[#5c564c]">起步，2026 四個時段</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {courseData.meta.starts.map((s) => (
-                <Button
-                  key={s}
-                  type="button"
-                  size="sm"
-                  variant={start === s ? "default" : "outline"}
-                  onClick={() => setStart(s)}
-                >
-                  {s}
-                </Button>
-              ))}
-            </div>
-          </div>
+          <ChoiceSet
+            legend="目標時間"
+            name="target"
+            value={target}
+            onChange={setTarget}
+            options={TARGETS.map((t) => ({ value: t, label: `${t} 小時` }))}
+          />
+          <ChoiceSet
+            legend="起步，2026 四個時段"
+            name="start"
+            value={start}
+            onChange={setStart}
+            options={courseData.meta.starts.map((s) => ({ value: s, label: s }))}
+          />
         </div>
         <div className="flex flex-col gap-3 border-t border-[#e6dccb] pt-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm leading-6 text-[#3c463f]">
@@ -144,19 +165,13 @@ export function Guide() {
             <p className="text-xs font-medium tracking-wide text-[#5c564c]">
               每站休息，上廁所、入水。坐太耐，腳會硬
             </p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {[5, 8, 10, 15].map((mins) => (
-                <Button
-                  key={mins}
-                  type="button"
-                  size="sm"
-                  variant={stops.restMin === mins ? "default" : "outline"}
-                  onClick={() => setStops((s) => ({ ...s, restMin: mins }))}
-                >
-                  {mins} 分鐘
-                </Button>
-              ))}
-            </div>
+            <ChoiceSet
+              legend="每站休息分鐘"
+              name="rest"
+              value={String(stops.restMin)}
+              onChange={(mins) => setStops((s) => ({ ...s, restMin: Number(mins) }))}
+              options={[5, 8, 10, 15].map((mins) => ({ value: String(mins), label: `${mins} 分鐘` }))}
+            />
           </div>
           <MealPick
             label="午餐"
@@ -181,7 +196,7 @@ export function Guide() {
         </div>
       </section>
 
-      <ol className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <ol role="list" className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
         {plan.cps.map((cp) => {
           const light = lightOf(cp.arrive);
           const pace = cp.minutes / cp.gpsSectionKm;
@@ -191,17 +206,17 @@ export function Guide() {
               key={cp.id}
               className={`rounded-2xl border px-3 py-2 ${cp.kind === "support" ? "border-[#e2c27a] bg-[#fbf6ea]" : "border-[#d9d0c0] bg-[#f7f3ea]"}`}
             >
-              <p className="text-[11px] text-[#5c564c]">
+              <p className="text-xs text-[#5c564c]">
                 {cp.kind === "support" ? "支援" : cp.kind === "finish" ? "終點" : cp.id.toUpperCase()}
               </p>
               <p className="font-serif text-lg leading-tight">{cp.name}</p>
               <p className="text-sm tabular-nums">到 {formatClock(cp.arrive)}</p>
               {cp.rest > 0 && (
-                <p className="text-[11px] text-[#8a3d22]">
+                <p className="text-xs text-[#8a3d22]">
                   {cp.meal ?? "休息"} {cp.rest} 分鐘，{formatClock(cp.depart)} 走
                 </p>
               )}
-              <p className="text-[11px] text-[#5c564c]">
+              <p className="text-xs text-[#5c564c]">
                 {LIGHT_LABEL[light]} · 行 {Math.round(cp.minutes)} 分（表上 {cp.sheetMinutes}）· {pace.toFixed(1)} 分/公里
                 {pace < 8 ? " · 要碎步" : ""}
                 {off ? " · 里數同表唔同" : ""}
@@ -214,7 +229,7 @@ export function Guide() {
       <section className="mt-8 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="rounded-3xl border border-[#d9d0c0] bg-[#f7f3ea] p-4 sm:p-5">
           <h2 className="font-serif text-2xl">邊度可以跑</h2>
-          <ul className="mt-3 space-y-3">
+          <ul role="list" className="mt-3 space-y-3">
             {courseData.runnable.map((item) => (
               <li key={item.name}>
                 <button
@@ -234,7 +249,7 @@ export function Guide() {
         </div>
         <div className="rounded-3xl border border-[#ead8c8] bg-[#fbf4ee] p-4 sm:p-5">
           <h2 className="font-serif text-2xl text-[#8a3d22]">唔好跑</h2>
-          <ul className="mt-3 space-y-2 text-sm leading-6">
+          <ul role="list" className="mt-3 space-y-2 text-sm leading-6">
             {courseData.noRun.map((item) => (
               <li key={item} className="border-b border-[#ead8c8] pb-2 last:border-0">
                 {item}
@@ -276,36 +291,24 @@ export function Guide() {
         <p className="mt-2 text-xs leading-5 text-[#5c564c]">{courseData.climbNote}</p>
       </div>
 
-      <Tabs defaultValue="segments" className="mt-8">
-        <TabsList className="h-auto w-full flex-wrap justify-start bg-[#e6dccb] p-1">
-          <TabsTrigger value="segments">小段</TabsTrigger>
-          <TabsTrigger value="km">每一公里</TabsTrigger>
-          <TabsTrigger value="sheet">時間表</TabsTrigger>
-          <TabsTrigger value="friend">朋友手記</TabsTrigger>
-          <TabsTrigger value="where">地名對照</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="segments" className="mt-4">
-          <div className="mb-3 flex flex-wrap gap-2">
-            {FILTERS.map((f) => (
-              <Button
-                key={f.id}
-                type="button"
-                size="sm"
-                variant={filter === f.id ? "default" : "outline"}
-                onClick={() => setFilter(f.id)}
-              >
-                {f.label}
-              </Button>
-            ))}
-          </div>
+      <CourseTabs
+        panels={{
+          segments: (
+            <>
+          <ChoiceSet
+            legend="篩選小段"
+            name="segment-filter"
+            value={filter}
+            onChange={setFilter}
+            options={FILTERS.map((f) => ({ value: f.id, label: f.label }))}
+          />
           <div className="space-y-6">
-            {courseData.checkpoints.map((cp) => {
+            {courseData.checkpoints.map((cp, index) => {
               const rows = segmentsFor(cp.id).filter((s) => matches(s, filter));
               if (rows.length === 0) return null;
               const clock = plan.cps.find((c) => c.id === cp.id);
               return (
-                <section key={cp.id}>
+                <section key={cp.id} className={index > 0 ? "defer" : undefined}>
                   <header className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
                     <h3 className="font-serif text-xl">
                       {cp.id === "finish" ? "終點" : cp.id.toUpperCase()} {cp.name}
@@ -320,7 +323,7 @@ export function Guide() {
                         : ""}
                     </p>
                   </header>
-                  <ul className="space-y-2">
+                  <ul role="list" className="space-y-2">
                     {rows.map((seg) => {
                       const t = plan.seg.get(seg.id);
                       const pace = seg.pace as Pace;
@@ -370,132 +373,102 @@ export function Guide() {
               );
             })}
           </div>
-        </TabsContent>
-
-        <TabsContent value="km" className="mt-4">
-          <div className="overflow-x-auto rounded-2xl border border-[#d9d0c0]">
-            <table className="w-full min-w-[640px] border-collapse text-sm">
-              <thead className="bg-[#132e24] text-left text-[#f6f1e6]">
-                <tr>
-                  <th className="px-3 py-2 font-medium">公里</th>
-                  <th className="px-3 py-2 font-medium">海拔</th>
-                  <th className="px-3 py-2 font-medium">升 / 降</th>
-                  <th className="px-3 py-2 font-medium">路況</th>
-                  <th className="px-3 py-2 font-medium">屬於</th>
-                </tr>
-              </thead>
-              <tbody>
-                {courseData.kms.map((row) => {
-                  const seg = row.segmentId ? segmentById(row.segmentId) : undefined;
-                  const advice = seg
-                    ? kmAdvice(row.grade, seg.pace as Pace, seg.surface)
-                    : { word: "—", run: false };
-                  return (
-                    <tr key={row.km} className="border-t border-[#e6dccb] odd:bg-[#f7f3ea]">
-                      <td className="px-3 py-2 tabular-nums">
-                        {row.km}–{row.toKm}
-                      </td>
-                      <td className="px-3 py-2 tabular-nums">
-                        {row.eleStart} → {row.eleEnd}
-                      </td>
-                      <td className="px-3 py-2 tabular-nums">
-                        +{row.gain} / −{row.loss}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span style={{ color: advice.run ? PACE_COLOR.run : undefined }}>
-                          {advice.word}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2">
-                        {seg ? (
-                          <button
-                            type="button"
-                            className="underline decoration-[#d9d0c0] underline-offset-4 hover:decoration-[#1e4636]"
-                            onClick={() => openSeg(seg.id)}
-                          >
-                            {seg.name}
-                          </button>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="sheet" className="mt-4">
+        </>
+          ),
+          km: (
+          <DataTable
+            caption="每一公里路況"
+            headers={["公里", "海拔", "升 / 降", "路況", "屬於"]}
+            rows={courseData.kms.map((row) => {
+              const seg = row.segmentId ? segmentById(row.segmentId) : undefined;
+              const advice = seg
+                ? kmAdvice(row.grade, seg.pace as Pace, seg.surface)
+                : { word: "—", run: false };
+              return {
+                key: String(row.km),
+                cells: [
+                  `${row.km}–${row.toKm}`,
+                  `${row.eleStart} → ${row.eleEnd}`,
+                  `+${row.gain} / −${row.loss}`,
+                  <span key="advice" style={{ color: advice.run ? PACE_COLOR.run : undefined }}>
+                    {advice.word}
+                  </span>,
+                  seg ? (
+                    <button
+                      key="seg"
+                      type="button"
+                      className="underline decoration-[#d9d0c0] underline-offset-4 hover:decoration-[#1e4636]"
+                      onClick={() => openSeg(seg.id)}
+                    >
+                      {seg.name}
+                    </button>
+                  ) : (
+                    "—"
+                  ),
+                ],
+              };
+            })}
+          />
+          ),
+          sheet: (
+            <>
           <p className="mb-3 text-sm leading-6 text-[#3c463f]">
             呢張係你原來嘅表，未扣休息。上面嘅到站鐘先係追 {target} 小時、包埋食飯之後嘅時間。
           </p>
-          <div className="overflow-x-auto rounded-2xl border border-[#d9d0c0]">
-            <table className="w-full min-w-[760px] border-collapse text-sm">
-              <thead className="bg-[#132e24] text-left text-[#f6f1e6]">
-                <tr>
-                  <th className="px-3 py-2 font-medium">站</th>
-                  <th className="px-3 py-2 font-medium">表上 / GPX</th>
-                  {TARGETS.map((t) => (
-                    <th key={t} className="px-3 py-2 font-medium">
-                      {t}h
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {stations().map((cp) => {
-                  const off = Math.abs(cp.sheetSectionKm - cp.gpsSectionKm) >= 1.5;
-                  return (
-                    <tr
-                      key={cp.id}
-                      className={`border-t border-[#e6dccb] align-top ${cp.kind === "support" ? "bg-[#fbf6ea]" : "odd:bg-[#f7f3ea]"}`}
-                    >
-                      <td className="px-3 py-2">
-                        <div className="font-medium">{cp.name}</div>
-                        <div className="text-xs text-[#5c564c]">{cp.blurb}</div>
-                      </td>
-                      <td className={`px-3 py-2 tabular-nums ${off ? "text-[#8a3d22]" : ""}`}>
-                        {cp.sheetSectionKm} / {cp.gpsSectionKm} 公里
-                      </td>
-                      {TARGETS.map((t) => {
-                        const mins = cp.sheetMinutes[t];
-                        const arrive = sheetArrival(cp.id, t);
-                        const pace = mins / cp.gpsSectionKm;
-                        return (
-                          <td key={t} className="px-3 py-2 tabular-nums">
-                            <div>{mins} 分</div>
-                            <div className="text-xs text-[#5c564c]">{formatClock(arrive)}</div>
-                            <div className={`text-[11px] ${pace < 8 ? "text-[#8a3d22]" : "text-[#5c564c]"}`}>
-                              {pace.toFixed(1)} 分/公里
-                            </div>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            caption="原表時間，未扣休息"
+            headers={["站", "表上 / GPX", ...TARGETS.map((t) => `${t}h`)]}
+            rows={stations().map((cp) => {
+              const off = Math.abs(cp.sheetSectionKm - cp.gpsSectionKm) >= 1.5;
+              return {
+                key: cp.id,
+                className: cp.kind === "support" ? "is-support" : undefined,
+                cells: [
+                  <span key="name">
+                    <span className="block font-medium">{cp.name}</span>
+                    <span className="block text-xs text-[#5c564c]">{cp.blurb}</span>
+                  </span>,
+                  <span key="km" className={off ? "text-[#8a3d22]" : undefined}>
+                    {cp.sheetSectionKm} / {cp.gpsSectionKm} 公里
+                  </span>,
+                  ...TARGETS.map((t) => {
+                    const mins = cp.sheetMinutes[t];
+                    const pace = mins / cp.gpsSectionKm;
+                    return (
+                      <span key={t}>
+                        <span className="block">{mins} 分</span>
+                        <span className="block text-xs text-[#5c564c]">{formatClock(sheetArrival(cp.id, t))}</span>
+                        <span className={`block text-xs ${pace < 8 ? "text-[#8a3d22]" : "text-[#5c564c]"}`}>
+                          {pace.toFixed(1)} 分/公里
+                        </span>
+                      </span>
+                    );
+                  }),
+                ],
+              };
+            })}
+          />
           <p className="mt-2 text-xs text-[#5c564c]">
             到達時間一欄假設 08:00 起步，同你張表一樣，未有計尾段拉長。
           </p>
-        </TabsContent>
-
-        <TabsContent value="friend" className="mt-4 space-y-4">
+        </>
+          ),
+          friend: (
+            <div className="space-y-4">
           <p className="text-sm leading-6">
             朋友四段操練可以參考路感、樓梯同邊度有士多。鐘點係當日練習，有站低，唔好直接當比賽配速。
           </p>
-          {courseData.friendBlocks.map((block) => (
-            <section key={block.id} className="rounded-3xl border border-[#d9d0c0] bg-[#f7f3ea] p-4">
+          {courseData.friendBlocks.map((block, index) => (
+            <section
+              key={block.id}
+              className={`${index > 0 ? "defer " : ""}rounded-3xl border border-[#d9d0c0] bg-[#f7f3ea] p-4`}
+            >
               <header className="flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="font-serif text-xl">{block.title}</h3>
                 <p className="text-sm text-[#5c564c]">操練大約 {block.hours}</p>
               </header>
               <p className="mt-1 text-sm leading-6 text-[#3c463f]">{block.note}</p>
-              <ul className="mt-3 divide-y divide-[#e6dccb]">
+              <ul role="list" className="mt-3 divide-y divide-[#e6dccb]">
                 {block.items.map((item) => (
                   <li key={`${block.id}-${item.clock}-${item.title}`} className="flex flex-wrap gap-3 py-2 text-sm">
                     <span className="w-28 shrink-0 tabular-nums text-[#5c564c]">{item.clock}</span>
@@ -512,35 +485,32 @@ export function Guide() {
               </ul>
             </section>
           ))}
-        </TabsContent>
-
-        <TabsContent value="where" className="mt-4">
-          <div className="overflow-x-auto rounded-2xl border border-[#d9d0c0]">
-            <table className="w-full min-w-[520px] border-collapse text-sm">
-              <thead className="bg-[#132e24] text-left text-[#f6f1e6]">
-                <tr>
-                  <th className="px-3 py-2 font-medium">地方</th>
-                  <th className="px-3 py-2 font-medium">邊度</th>
-                  <th className="px-3 py-2 font-medium">公里</th>
-                </tr>
-              </thead>
-              <tbody>
-                {courseData.landmarks.map((mark) => (
-                  <tr key={mark.name} className="border-t border-[#e6dccb] odd:bg-[#f7f3ea]">
-                    <td className="px-3 py-2">
-                      <button type="button" className="font-medium hover:underline" onClick={() => openSeg(mark.segmentId)}>
-                        {mark.name}
-                      </button>
-                    </td>
-                    <td className="px-3 py-2 text-[#3c463f]">{mark.where}</td>
-                    <td className="px-3 py-2 tabular-nums">{mark.km}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+          ),
+          where: (
+          <DataTable
+            caption="地名對照"
+            headers={["地方", "邊度", "公里"]}
+            rows={courseData.landmarks.map((mark) => ({
+              key: mark.name,
+              cells: [
+                <button
+                  key="name"
+                  type="button"
+                  className="font-medium hover:underline"
+                  onClick={() => openSeg(mark.segmentId)}
+                >
+                  {mark.name}
+                </button>,
+                mark.where,
+                mark.km,
+              ],
+            }))}
+          />
+          ),
+        }}
+      />
+      </main>
 
       <footer className="mt-10 space-y-2 text-xs leading-5 text-[#5c564c]">
         {courseData.meta.sources.map((s) => (
@@ -551,41 +521,47 @@ export function Guide() {
         </p>
       </footer>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg">
-          {active && activeClock && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="font-serif text-xl">{active.name}</DialogTitle>
-                <DialogDescription>
-                  {active.fromKm.toFixed(1)}–{active.toKm.toFixed(1)} 公里 · {active.surface} ·{" "}
-                  {PACE_LABEL[active.pace as Pace]}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3 text-sm leading-6">
-                <p>{active.note}</p>
-                <p className="tabular-nums text-[#3c463f]">
-                  {formatClock(activeClock.start)} 到 {formatClock(activeClock.end)} ·{" "}
-                  {Math.round(activeClock.minutes)} 分鐘 · {LIGHT_LABEL[lightOf((activeClock.start + activeClock.end) / 2)]}
-                  <br />
-                  爬 {active.gain} 米，落 {active.loss} 米，海拔 {active.eleStart} → {active.eleEnd}
+      <dialog
+        ref={dialogRef}
+        aria-labelledby="segment-title"
+        closedby="any"
+        onClose={() => setOpen(false)}
+      >
+        {active && activeClock && (
+          <>
+            <h2 id="segment-title" className="font-serif text-2xl">
+              {active.name}
+            </h2>
+            <p>
+              {active.fromKm.toFixed(1)}–{active.toKm.toFixed(1)} 公里 · {active.surface} ·{" "}
+              {PACE_LABEL[active.pace as Pace]}
+            </p>
+            <div className="mt-3 space-y-3 text-sm leading-6">
+              <p>{active.note}</p>
+              <p className="tabular-nums text-[#3c463f]">
+                {formatClock(activeClock.start)} 到 {formatClock(activeClock.end)} ·{" "}
+                {Math.round(activeClock.minutes)} 分鐘 · {LIGHT_LABEL[lightOf((activeClock.start + activeClock.end) / 2)]}
+                <br />
+                爬 {active.gain} 米，落 {active.loss} 米，海拔 {active.eleStart} → {active.eleEnd}
+              </p>
+              {active.stairs && <p>樓梯：{active.stairs}</p>}
+              {active.friend && <p className="rounded-xl bg-[#efe2cf] px-3 py-2">操練：{active.friend}</p>}
+              {active.facilities.length > 0 && <p>附近：{active.facilities.join("、")}</p>}
+              {active.marks.length > 0 && <p>標記：{active.marks.join("、")}</p>}
+              {activeClock.minutes / active.distanceKm < 7 && (
+                <p className="text-[#8a3d22]">
+                  呢截要 {(activeClock.minutes / active.distanceKm).toFixed(1)} 分一公里，要碎步先追到。
                 </p>
-                {active.stairs && <p>樓梯：{active.stairs}</p>}
-                {active.friend && <p className="rounded-xl bg-[#efe2cf] px-3 py-2">操練：{active.friend}</p>}
-                {active.facilities.length > 0 && (
-                  <p>附近：{active.facilities.join("、")}</p>
-                )}
-                {active.marks.length > 0 && <p>標記：{active.marks.join("、")}</p>}
-                {activeClock.minutes / active.distanceKm < 7 && (
-                  <p className="text-[#8a3d22]">
-                    呢截要 {(activeClock.minutes / active.distanceKm).toFixed(1)} 分一公里，要碎步先追到。
-                  </p>
-                )}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+              )}
+            </div>
+            <form method="dialog" className="mt-4">
+              <button type="submit" autoFocus className="choice-close">
+                關閉
+              </button>
+            </form>
+          </>
+        )}
+      </dialog>
     </div>
   );
 }
@@ -623,33 +599,20 @@ function MealPick({
       .map((cp) => ({ id: cp.id, name: cp.name }));
   return (
     <div>
-      <p className="text-xs font-medium tracking-wide text-[#5c564c]">{label}</p>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {stations.map((cp) => (
-          <Button
-            key={cp.id}
-            type="button"
-            size="sm"
-            variant={stationId === cp.id ? "default" : "outline"}
-            onClick={() => onStation(cp.id)}
-          >
-            {cp.name}
-          </Button>
-        ))}
-      </div>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {[15, 20, 25, 30].map((mins) => (
-          <Button
-            key={mins}
-            type="button"
-            size="sm"
-            variant={minutes === mins ? "default" : "outline"}
-            onClick={() => onMinutes(mins)}
-          >
-            {mins} 分鐘
-          </Button>
-        ))}
-      </div>
+      <ChoiceSet
+        legend={label}
+        name={`meal-${label}`}
+        value={stationId}
+        onChange={onStation}
+        options={stations.map((cp) => ({ value: cp.id, label: cp.name }))}
+      />
+      <ChoiceSet
+        legend={`${label}分鐘`}
+        name={`meal-mins-${label}`}
+        value={String(minutes)}
+        onChange={(mins) => onMinutes(Number(mins))}
+        options={[15, 20, 25, 30].map((mins) => ({ value: String(mins), label: `${mins} 分鐘` }))}
+      />
       <p className="mt-1 text-xs leading-5 text-[#5c564c]">{hint}</p>
     </div>
   );
@@ -667,7 +630,7 @@ function sheetArrival(cpId: string, target: Target) {
 function Stat({ k, v }: { k: string; v: string }) {
   return (
     <div className="rounded-2xl bg-white/5 px-3 py-3">
-      <dt className="text-[11px] text-[#d5cbb8]">{k}</dt>
+      <dt className="text-xs text-[#d5cbb8]">{k}</dt>
       <dd className="font-serif text-lg">{v}</dd>
     </div>
   );

@@ -1,0 +1,336 @@
+body {
+  line-height: 1.5;
+  text-align: start;
+}
+
+h1 {
+  font-size: clamp(2rem, 1.4rem + 2vw, 3.25rem);
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
+h2,
+h3,
+caption {
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+  max-inline-size: 80ch;
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  inset-block-start: 0.5rem;
+  z-index: 20;
+  transform: translateY(-200%);
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.choice-set {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.choice-set legend {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #5c564c;
+  padding: 0;
+}
+
+.choice-set__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block-start: 0.5rem;
+}
+
+.choice {
+  position: relative;
+}
+
+.choice input {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: clip;
+  opacity: 0;
+}
+
+.choice span {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 2.75rem;
+  padding-inline: 0.8rem;
+  border: 1px solid #d9d0c0;
+  border-radius: 0.6rem;
+  background: #f7f3ea;
+  position: relative;
+}
+
+.choice span::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0.6rem;
+  inset-block-end: 0.35rem;
+  border-block-end: 3px solid transparent;
+}
+
+.choice:has(:checked) span {
+  background: #1e4636;
+  color: #f6f1e6;
+  border-color: #1e4636;
+}
+
+.choice:has(:checked) span::after {
+  border-block-end-color: #e2c27a;
+}
+
+.choice:has(:focus-visible) span {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.course-tabs__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.course-tabs__list {
+  display: flex;
+  flex: 1;
+  gap: 0.25rem;
+  overflow-x: auto;
+  scroll-snap-type: inline proximity;
+  scroll-padding-inline: 3rem;
+  --fade-size: 3rem;
+  --fade-dir: right;
+  --fade-start-pos: 0;
+  --fade-end-pos: 100%;
+  mask:
+    linear-gradient(black, black) no-clip subtract,
+    linear-gradient(to var(--fade-dir), black, transparent) var(--fade-start-pos) 0 / var(--fade-start) 100% no-repeat no-clip,
+    linear-gradient(to var(--fade-dir), transparent, black) var(--fade-end-pos) 0 / var(--fade-end) 100% no-repeat no-clip;
+  animation: reveal-fade-start linear both, hide-fade-end linear both;
+  animation-timeline: scroll(self inline);
+  animation-range: 0 var(--fade-size), calc(100% - var(--fade-size)) 100%;
+}
+
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
+@keyframes reveal-fade-start {
+  to {
+    --fade-start: var(--fade-size);
+  }
+}
+
+@keyframes hide-fade-end {
+  from {
+    --fade-end: var(--fade-size);
+  }
+}
+
+.course-tabs__list button {
+  position: relative;
+  flex: none;
+  scroll-snap-align: start;
+  min-block-size: 2.75rem;
+  padding-inline: 0.8rem;
+  background: transparent;
+  color: #3c463f;
+  border: 0;
+}
+
+.course-tabs__list button::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0.35rem;
+  border-block-end: 3px solid transparent;
+}
+
+.course-tabs__list button[aria-selected="true"] {
+  color: #1e4636;
+}
+
+.course-tabs__list button[aria-selected="true"]::after {
+  border-block-end-color: #1e4636;
+}
+
+.course-tabs [role="tabpanel"] > .panel-body {
+  margin-block-start: 1rem;
+}
+
+.table-wrap {
+  overflow: auto;
+  max-inline-size: 100%;
+  max-block-size: min(32rem, 80dvh);
+  container-type: inline-size;
+  border: 1px solid #d9d0c0;
+  border-radius: 1rem;
+  background: #f7f3ea;
+}
+
+.stack-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  inline-size: 100%;
+  min-inline-size: 40rem;
+  font-size: 0.875rem;
+}
+
+.stack-table caption {
+  caption-side: top;
+  text-align: start;
+  padding: 0.75rem;
+  font-weight: 600;
+}
+
+.stack-table thead {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  background: #132e24;
+  color: #f6f1e6;
+}
+
+.stack-table th,
+.stack-table td {
+  padding: 0.5rem 0.75rem;
+  text-align: start;
+  vertical-align: top;
+  white-space: nowrap;
+  background: inherit;
+}
+
+.stack-table tbody th {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: #f7f3ea;
+}
+
+.stack-table tbody tr {
+  background: #f7f3ea;
+}
+
+.stack-table .is-support {
+  background: #fbf6ea;
+}
+
+.stack-table .is-support th {
+  background: #fbf6ea;
+}
+
+@container (width < 40rem) {
+  .stack-table {
+    min-inline-size: 0;
+  }
+
+  .stack-table,
+  .stack-table thead,
+  .stack-table tbody,
+  .stack-table tr,
+  .stack-table th,
+  .stack-table td {
+    display: block;
+  }
+
+  .stack-table thead {
+    display: none;
+  }
+
+  .stack-table tr {
+    margin-block-end: 1rem;
+    border: 1px solid #d9d0c0;
+    border-radius: 0.75rem;
+  }
+
+  .stack-table th,
+  .stack-table td {
+    white-space: normal;
+  }
+
+  .stack-table tbody th {
+    position: sticky;
+    inset-block-start: 0;
+    inset-inline-start: auto;
+    z-index: 2;
+    background: #efe6d6;
+  }
+
+  .stack-table td:nth-child(2)::before { content: var(--label-2) ": "; font-weight: 600; }
+  .stack-table td:nth-child(3)::before { content: var(--label-3) ": "; font-weight: 600; }
+  .stack-table td:nth-child(4)::before { content: var(--label-4) ": "; font-weight: 600; }
+  .stack-table td:nth-child(5)::before { content: var(--label-5) ": "; font-weight: 600; }
+  .stack-table td:nth-child(6)::before { content: var(--label-6) ": "; font-weight: 600; }
+  .stack-table td:nth-child(7)::before { content: var(--label-7) ": "; font-weight: 600; }
+  .stack-table td:nth-child(8)::before { content: var(--label-8) ": "; font-weight: 600; }
+}
+
+dialog[open] {
+  max-inline-size: min(36rem, calc(100% - 2rem));
+  border: 1px solid #d9d0c0;
+  border-radius: 1rem;
+  background: #f7f3ea;
+  color: #1a2420;
+  padding: 1.25rem;
+}
+
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: oklch(0.2 0.02 160 / 0.45);
+}
+
+.choice-close {
+  min-block-size: 2.75rem;
+  padding-inline: 1rem;
+  border: 1px solid #1e4636;
+  border-radius: 0.6rem;
+  background: #1e4636;
+  color: #f6f1e6;
+}
+
+.defer {
+  content-visibility: auto;
+  contain-intrinsic-size: auto none auto 12rem;
+}
+
+.chart-region {
+  overflow: auto;
+  max-inline-size: 100%;
+}

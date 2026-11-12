@@ -87,15 +87,22 @@ export function ProfileChart({
   }
 
   return (
-    <div className="overflow-x-auto rounded-2xl bg-[#132e24] p-3 text-[#f6f1e6] shadow-[0_18px_50px_-28px_rgba(19,46,36,0.8)]">
+    <div
+      className="chart-region rounded-2xl bg-[#132e24] p-3 text-[#f6f1e6] shadow-[0_18px_50px_-28px_rgba(19,46,36,0.8)]"
+      tabIndex={0}
+      role="region"
+      aria-labelledby="profile-heading"
+    >
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2 px-1">
         <div>
-          <p className="font-serif text-lg">高度</p>
+          <h2 id="profile-heading" className="font-serif text-lg">
+            高度
+          </h2>
           <p className="text-xs text-[#d5cbb8]">
             撳線可以睇嗰截。顏色係路況，唔係海拔。
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 text-[11px] text-[#d5cbb8]">
+        <div className="flex flex-wrap gap-2 text-xs text-[#d5cbb8]">
           {(
             [
               ["可跑", PACE_COLOR.run],
@@ -115,7 +122,7 @@ export function ProfileChart({
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto min-w-[720px] w-full touch-pan-x"
         role="img"
-        aria-label="毅行者全程高度圖"
+        aria-labelledby="profile-heading"
         onMouseMove={(e) => setHover(kmFromEvent(e))}
         onMouseLeave={() => setHover(null)}
         onClick={(e) => {
